@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { PROBLEMS } from "../data/problems";
+// import { PROBLEMS } from "../data/problems";
+import { problemsApi } from "../api/problems";
 import Navbar from "../components/Navbar";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -16,27 +17,41 @@ function ProblemPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  const [currentProblemId, setCurrentProblemId] = useState("two-sum");
-  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
-  const [code, setCode] = useState(PROBLEMS[currentProblemId].starterCode.javascript);
+  const [currentProblemId, setCurrentProblemId] = useState(null);
+  const [selectedLanguage, setSelectedLanguage] = useState("python");
+  const [code, setCode] = useState("");
   const [output, setOutput] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [loading, setLoading] = useState(true);
 
-  const currentProblem = PROBLEMS[currentProblemId];
-
-  // update problem when URL param changes
+  // fetch problem from backend
   useEffect(() => {
-    if (id && PROBLEMS[id]) {
-      setCurrentProblemId(id);
-      setCode(PROBLEMS[id].starterCode[selectedLanguage]);
-      setOutput(null);
-    }
-  }, [id, selectedLanguage]);
+    if (!id) return;
+    setLoading(true);
+
+    console.log(id)
+
+    problemsApi
+      .getProblemById(id)
+      .then((data) => {
+        console.log(data)
+        setCurrentProblemId(data);
+        setSelectedLanguage("javascript");
+        setCode(data.starterCode.javascript);
+        setOutput(null);
+        setLoading(false);
+      })
+      .catch((e) => {
+        console.error("Error Cui: ", e)
+        toast.error("Failed to load problem");
+        setLoading(false);
+      });
+  }, [id]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    setCode(currentProblem.starterCode[newLang]);
+    setCode(currentProblemId.starterCode[newLang]);
     setOutput(null);
   };
 
@@ -92,7 +107,7 @@ function ProblemPage() {
     // check if code executed successfully and matches expected output
 
     if (result.success) {
-      const expectedOutput = currentProblem.expectedOutput[selectedLanguage];
+      const expectedOutput = currentProblemId.expectedOutput[selectedLanguage];
       const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
       if (testsPassed) {
@@ -106,6 +121,10 @@ function ProblemPage() {
     }
   };
 
+  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (!currentProblemId) return <div className="flex justify-center items-center h-screen">Problem not found</div>;
+
+
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
@@ -115,10 +134,10 @@ function ProblemPage() {
           {/* left panel- problem desc */}
           <Panel defaultSize={40} minSize={30}>
             <ProblemDescription
-              problem={currentProblem}
-              currentProblemId={currentProblemId}
+              problem={currentProblemId}
+              currentProblemId={id}
               onProblemChange={handleProblemChange}
-              allProblems={Object.values(PROBLEMS)}
+              allProblems={[]}
             />
           </Panel>
 

@@ -1,5 +1,7 @@
 import { getDifficultyBadgeClass } from "../lib/utils";
 function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems }) {
+  console.log(problem)
+  console.log(currentProblemId)
   return (
     <div className="h-full overflow-y-auto bg-base-200">
       {/* HEADER SECTION */}
@@ -34,7 +36,7 @@ function ProblemDescription({ problem, currentProblemId, onProblemChange, allPro
           <h2 className="text-xl font-bold text-base-content">Description</h2>
 
           <div className="space-y-3 text-base leading-relaxed">
-            <p className="text-base-content/90">{problem.description.text}</p>
+            <p className="text-base-content/90">{problem.description.text || ""}</p>
             {problem.description.notes.map((note, idx) => (
               <p key={idx} className="text-base-content/90">
                 {note}

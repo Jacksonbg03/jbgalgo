@@ -10,24 +10,30 @@ import {
 import { Link } from "react-router";
 import { getDifficultyBadgeClass } from "../lib/utils";
 
-function ActiveSessions({ sessions, isLoading, isUserInSession }) {
+function ActiveSessions({ sessions, isLoading, isUserInSession, onCreateSession }) {
   return (
     <div className="lg:col-span-2 card bg-base-100 border-2 border-primary/20 hover:border-primary/30 h-full">
       <div className="card-body">
         {/* HEADERS SECTION */}
         <div className="flex items-center justify-between mb-6">
           {/* TITLE AND ICON */}
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
-              <ZapIcon className="size-5" />
+          <div className="w-[70%] flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-gradient-to-br from-primary to-secondary rounded-xl">
+                <ZapIcon className="size-5 text-white" />
+              </div>
+              <h2 className="text-2xl font-extrabold">Live Sessions</h2>
             </div>
-            <h2 className="text-2xl font-black">Live Sessions</h2>
+
+            <div className="flex items-center gap-2">
+              <div className="size-2 bg-success rounded-full" />
+              <span className="text-sm font-medium text-success">{sessions.length} active</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 cursor-pointer bg-primary py-2 px-4 rounded-xl text-white font-bold text-lg group hover:bg-[var(--color-primary-hover)] transition-all duration-300" onClick={onCreateSession}>
+              <span>Create Session</span>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="size-2 bg-success rounded-full" />
-            <span className="text-sm font-medium text-success">{sessions.length} active</span>
-          </div>
         </div>
 
         {/* SESSIONS LIST */}

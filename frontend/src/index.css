@@ -10,3 +10,35 @@
     cursor: pointer;
   }
 }
+
+[data-theme="halloween"]{
+  --color-primary: #ff8f00;
+  --color-secondary: #FF7F50;
+  --color-accent: #FFC107;
+  --color-primary-hover: #d87b00;
+}
+body{
+  font-family: "Poppins", sans-serif;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.rotate {
+  animation: spin 3s linear infinite; /* 3 detik sekali putar penuh, terus muter */
+}
+
+.typewriter-cursor::after {
+  content: "|";
+  display: inline-block;
+  margin-left: 4px;
+  animation: blink 0.8s infinite;
+  color: var(--color-accent);
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  50.1%, 100% { opacity: 0; }
+}
