@@ -33,8 +33,8 @@ export const submitProblem = async (req, res) => {
       (p) => p.problem.toString() === problem._id.toString()
     );
 
-    if (!existing) {
-      existing.solved = solved;
+    if (existing) {
+      existing.solved = solved || true;
     } else {
       user.solvedProblems.push({ problem: problem._id, solved: solved });
     }
@@ -51,13 +51,12 @@ export const submitProblem = async (req, res) => {
 export const getSolvedProblem = async (req, res) => {
   try {
     const { userId } = req.params;
-    return res.status(404).json({message: userId})
-    const user = await User.findByOne({clerkId: userId}).populate("solvedProblems.problem");
+    const user = await User.findOne({clerkId: userId}).populate("solvedProblems.problem");
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const problems = await Problems.find();
     const results = problems.map((p) => {
-      const status = user.solvedProblems.find(
+    const status = user.solvedProblems.find(
         (up) => up.problem._id.toString() === p._id.toString()
       );
       return {
@@ -65,7 +64,7 @@ export const getSolvedProblem = async (req, res) => {
         solved: status ? status.solved : false,
       };
     });
-
+    
     return res.json({ problems: results });
   } catch (err) {
     console.error(err);

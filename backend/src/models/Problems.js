@@ -5,7 +5,7 @@ const problemsSchema = new mongoose.Schema(
     problemId: { type: String, required: true, unique: true }, // ex: "two-sum"
     title: { type: String, required: true },
     difficulty: { type: String, enum: ["Easy", "Medium", "Hard"], required: true },
-    category: { type: String },
+    category: { type: [String], default: [] },
     description: {
       text: String,
       notes: [String],

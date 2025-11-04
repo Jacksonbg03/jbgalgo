@@ -2,8 +2,8 @@ import axiosInstance from "../lib/axios";
 
 export const problemsApi = {
   getSolvedProblem: async (userId) => {
-    const response = await axiosInstance.get(`/problems/${userId}/solved`);
-    return response.data;
+    const response = await axiosInstance.get(`/problems/problem/${userId}/solved`);
+    return response.data.problems;
   },
 
   // Ambil problem berdasarkan problemId

@@ -24,7 +24,7 @@ function HomePage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between">
         {/* LOGO */}
         <Link to="/" className="flex items-center gap-3">
-          <img src={logo} alt="logo" className="w-8 h-8" />
+          <img src={logo} alt="logo" className="w-8 h-8 animate-spin" />
           <div className="flex flex-col">
             <span className="font-black text-lg sm:text-xl bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
               JBGAlgo
@@ -49,32 +49,35 @@ function HomePage() {
           {/* LEFT CONTENT */}
           <div className="space-y-6 sm:space-y-8">
             <div className="flex flex-col items-center text-center space-y-6 lg:items-start lg:text-left">
-              <div className="badge badge-primary badge-lg flex items-center gap-2">
-                <ZapIcon className="size-4" /> Real-time Collaboration
-              </div>
+  {/* Badge */}
+  <div className="badge badge-primary badge-lg flex items-center gap-2 text-base sm:text-base">
+    <ZapIcon className="size-4" /> Real-time Collaboration
+  </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-7xl font-black leading-tight">
-                <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
-                  Code Together,
-                </span>
-                <br />
-                <span className="text-base-content">Learn Smarter</span>
-              </h1>
+  {/* Hero Heading */}
+  <h1 className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black leading-snug">
+    <span className="bg-gradient-to-r from-primary via-secondary to-accent bg-clip-text text-transparent">
+      Code Together,
+    </span>
+    <br />
+    <span className="text-base-content">Learn Smarter</span>
+  </h1>
 
-              <p className="text-base sm:text-lg text-base-content/70 max-w-xl">
-                Level up your coding skills through real challenges, contests, and hands-on practice.
-              </p>
+  {/* Hero Paragraph */}
+  <p className="text-base sm:text-lg md:text-xl text-base-content/70 max-w-xl">
+    Level up your coding skills through real challenges, contests, and hands-on practice.
+  </p>
 
               {/* CTA Buttons */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center lg:justify-start lg:items-start w-full lg:w-auto">
+              <div className="flex flex-wrap justify-center lg:justify-start gap-4 w-full">
                 <SignInButton mode="modal">
-                  <button className="btn btn-primary btn-lg w-full sm:w-auto flex items-center justify-center gap-2">
-                    Start Coding Now <ArrowRightIcon className="size-5" />
+                  <button className="btn btn-primary btn-md sm:btn-lg min-w-[180px] flex-auto sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap">
+                    Start Coding Now <ArrowRightIcon className="size-4" />
                   </button>
                 </SignInButton>
 
-                <button className="btn btn-outline btn-lg w-full sm:w-auto flex items-center justify-center gap-2">
-                  <UsersIcon className="size-5" /> Join Community
+                <button className="btn btn-outline btn-md sm:btn-lg min-w-[180px] flex-auto sm:flex-none flex items-center justify-center gap-2 whitespace-nowrap">
+                  <UsersIcon className="size-4" /> Join Community
                 </button>
               </div>
             </div>

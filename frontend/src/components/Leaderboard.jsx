@@ -1,0 +1,60 @@
+import React from 'react'
+import { Trophy } from "lucide-react";
+
+export const Leaderboard = ({ data }) => {
+  console.log(data)
+  return (
+    <div className="card bg-base-100 border-2 border-primary/20 hover:border-primary/40 mt-8">
+      <div className="card-body">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2 bg-gradient-to-br from-accent to-secondary rounded-xl">
+            <Trophy className="w-5 h-5 text-white" />
+          </div>
+          <h2 className="text-2xl font-black">Top Coders</h2>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="table w-full border border-primary/20">
+            <thead>
+              <tr className="bg-primary/60 text-[#cfcfcf]">
+                <th className="text-left">#</th>
+                <th className="text-left">Name</th>
+                <th className="text-center">Total</th>
+                <th className="text-center">Easy</th>
+                <th className="text-center">Medium</th>
+                <th className="text-center">Hard</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-4 text-base-content/70">
+                    No data found
+                  </td>
+                </tr>
+              ) : (
+                data.map((user, index) => (
+                  <tr key={index} className="hover:bg-primary/10 rounded-lg">
+                    <td>{index + 1}</td>
+                    <td className="flex items-center gap-2">
+                      <img
+                        src={user.profileImage}
+                        alt={user.name}
+                        className="w-8 h-8 rounded-full object-cover"
+                      />
+                      {user.name}
+                    </td>
+                    <td className="text-center">{user.totalSolved}</td>
+                    <td className="text-center">{user.easy}</td>
+                    <td className="text-center">{user.medium}</td>
+                    <td className="text-center">{user.hard}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  )
+}
