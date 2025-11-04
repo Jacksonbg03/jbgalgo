@@ -18,6 +18,7 @@ export const sessionApi = {
 
   getSessionById: async (id) => {
     const response = await axiosInstance.get(`/sessions/${id}`);
+    console.log(id)
     return response.data;
   },
 

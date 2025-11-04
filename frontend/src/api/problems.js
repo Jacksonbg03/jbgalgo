@@ -9,8 +9,12 @@ export const problemsApi = {
   // Ambil problem berdasarkan problemId
   getProblemById: async (problemId) => {
     const response = await axiosInstance.get(`/problems/problem/${problemId}`);
-    console.log("INI RESPONSE", response)
     return response.data;
+  },
+
+  getProblems: async ()=>{
+    const response = await axiosInstance.get("/problems/problem");
+    return response.data
   },
 
   // Submit jawaban user

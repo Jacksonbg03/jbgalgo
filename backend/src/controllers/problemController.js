@@ -19,9 +19,11 @@ export const addProblem = async (req, res) => {
 // Submit jawaban user
 export const submitProblem = async (req, res) => {
   try {
-    const { userId, problemId, solved } = req.body;
+    const clerkId = req.user.clerkId
+    // const { userId, problemId, solved } = req.body;
+    return res.status(200).json({aduha: "IAJDIAJ"})
 
-    const user = await User.findById(userId);
+    const user = await User.findById({clerkId});
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const problem = await Problem.findOne({ problemId });
@@ -86,13 +88,64 @@ export const getLeaderboard = async (req, res) => {
 export const getProblemById = async (req, res) => {
   try {
     const { problemId } = req.params;
+    if (!problemId) return res.status(400).json({ 
+      error: `ProblemId is required: ${problemId}`
+    });
+
     const problem = await Problems.findOne({ problemId });
-    console.log("AHAII")
-    console.log(problem)
-    if (!problem) return res.status(404).json({ message: "Problem not found" });
+
+    if (!problem) return res.status(404).json({ error: "Problem not found" });
+
     return res.json(problem);
   } catch (err) {
-    console.error("INI DIA ERROR: ",err);
     return res.status(500).json({ message: "Server error" });
   }
 };
+
+export const getProblems = async (req, res) =>{
+  try {
+    const problems = await Problems.find();
+    if (!problems) return res.status(404).json({error: "Problems not found"})
+    
+      return res.json(problems)
+  } catch (error) {
+    return res.status(500).json({message: "Server error"})
+  }
+}
+
+export const getProblemsByUser = async (req, res) =>{
+  try {
+
+    // const {clerkId, solved, difficulty, category} = req.query;
+    const clerkId = req.user.clerkId
+    const user = await User.findOne({clerkId}).populate("solvedProblems", "problem solved");
+    
+    return res.status(200).json({user:user})
+    // const user = await User.findOne({clerkId}).populate("solvedProblems.problem")
+
+    if(!user){
+      return res.status(404).json({message: `User not found ${clerkId} ${solved} ${difficulty}`})
+    }
+
+    let query = {}
+    if (difficulty) query.difficulty = difficulty
+    if (category) query.category = category
+
+    const allProblems = await Problems.find();
+    if (!problems) return res.status(404).json({error: "Problems not found"})
+
+    const solvedId = user.solvedProblems.filter((p)=>p.solved).map((p)=>p._id.toString());
+
+    // Kalau user mau filter berdasarkan solved / unsolved
+    let filteredProblems = problemsWithStatus;
+    if (solved === "true") {
+      filteredProblems = problemsWithStatus.filter((p) => p.solved);
+    } else if (solved === "false") {
+      filteredProblems = problemsWithStatus.filter((p) => !p.solved);
+    }
+
+    res.json(filteredProblems);
+  } catch (error) {
+    res.status(500).json({message: "Server error"})
+  }
+}

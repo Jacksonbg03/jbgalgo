@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-// import { PROBLEMS } from "../data/problems";
-import { problemsApi } from "../api/problems";
 import Navbar from "../components/Navbar";
 
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -12,48 +10,48 @@ import { executeCode } from "../lib/piston";
 
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
+import { useProblems, useProblemById } from "../hooks/useProblems";
 
 function ProblemPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [outputArr, setOutputArr] = useState(null);
 
   const [currentProblemId, setCurrentProblemId] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState("python");
   const [code, setCode] = useState("");
-  const [output, setOutput] = useState(null);
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
-  const [loading, setLoading] = useState(true);
+
+  const { data: problemsData, isLoadingProblemsData} = useProblems();
+  const { data: problem, isLoadingProblem} = useProblemById(id);
 
   // fetch problem from backend
   useEffect(() => {
-    if (!id) return;
-    setLoading(true);
+    if (problem) {
+      setCurrentProblemId(problem);
+      setSelectedLanguage("python");
+      setCode(problem.starterCode.python);
+      setOutputArr([])
+      setIsCorrect(null);
+      setError(null);
+    }
+  }, [problem]);
 
-    console.log(id)
-
-    problemsApi
-      .getProblemById(id)
-      .then((data) => {
-        console.log(data)
-        setCurrentProblemId(data);
-        setSelectedLanguage("javascript");
-        setCode(data.starterCode.javascript);
-        setOutput(null);
-        setLoading(false);
-      })
-      .catch((e) => {
-        console.error("Error Cui: ", e)
-        toast.error("Failed to load problem");
-        setLoading(false);
-      });
-  }, [id]);
+  
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
     setCode(currentProblemId.starterCode[newLang]);
-    setOutput(null);
+    setOutputArr([])
+    setIsCorrect(null);
+    setError(null);
   };
+
+    // if (isLoadingProblem) return <p>Loading problem...</p>;
+    // if (isErrorProblem) return <p>Failed to load problem.</p>;
 
   const handleProblemChange = (newProblemId) => navigate(`/problem/${newProblemId}`);
 
@@ -98,11 +96,29 @@ function ProblemPage() {
 
   const handleRunCode = async () => {
     setIsRunning(true);
-    setOutput(null);
+    setOutputArr([])
+    setIsCorrect(null);
+    setError(null);
 
     const result = await executeCode(selectedLanguage, code);
-    setOutput(result);
+    const res_split = result.output.trim().split("\n").filter(Boolean);
+    console.log(result)
+    console.log(res_split)
+    const res_arr = res_split.map(line => {
+      try {
+        return JSON.parse(line);
+      } catch {
+        return line;
+      }
+    });
+    setError(result.error || "");
+    setOutputArr(res_arr || []);
     setIsRunning(false);
+
+    if (result.error && result.error.trim() !== ""){
+      toast.error("Your code has an error!");
+      setIsCorrect(false);
+    }
 
     // check if code executed successfully and matches expected output
 
@@ -113,16 +129,19 @@ function ProblemPage() {
       if (testsPassed) {
         triggerConfetti();
         toast.success("All tests passed! Great job!");
+        setIsCorrect(true);
       } else {
         toast.error("Tests failed. Check your output!");
+        setIsCorrect(false);
       }
     } else {
       toast.error("Code execution failed!");
+      setIsCorrect(false);
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-  if (!currentProblemId) return <div className="flex justify-center items-center h-screen">Problem not found</div>;
+  if (isLoadingProblem || isLoadingProblemsData) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (!currentProblemId) return <div className="flex justify-center items-center h-screen text-[60px]">Loading...</div>;
 
 
   return (
@@ -137,7 +156,7 @@ function ProblemPage() {
               problem={currentProblemId}
               currentProblemId={id}
               onProblemChange={handleProblemChange}
-              allProblems={[]}
+              allProblems={problemsData}
             />
           </Panel>
 
@@ -163,7 +182,7 @@ function ProblemPage() {
               {/* Bottom panel - Output Panel*/}
 
               <Panel defaultSize={30} minSize={30}>
-                <OutputPanel output={output} />
+                <OutputPanel output={outputArr} error={error} isCorrect={isCorrect}/>
               </Panel>
             </PanelGroup>
           </Panel>

@@ -3,6 +3,7 @@ import { chatClient } from "../lib/stream.js";
 export async function getStreamToken(req, res) {
   try {
     // use clerkId for Stream (not mongodb _id)=> it should match the id we have in the stream dashboard
+    console.log(req)
     const token = chatClient.createToken(req.user.clerkId);
 
     res.status(200).json({
@@ -10,6 +11,7 @@ export async function getStreamToken(req, res) {
       userId: req.user.clerkId,
       userName: req.user.name,
       userImage: req.user.image,
+      jackson: req.user
     });
   } catch (error) {
     console.log("Error in getStreamToken controller:", error.message);

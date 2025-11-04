@@ -4,8 +4,11 @@ import {
   submitProblem,
   getUserProblems,
   getLeaderboard,
-  getProblemById
+  getProblemById,
+  getProblems,
+  getProblemsByUser
 } from "../controllers/problemController.js";
+import { protectRoute } from "../middleware/protectRoute.js";
 
 const router = express.Router();
 
@@ -13,7 +16,7 @@ const router = express.Router();
 router.post("/add", addProblem);
 
 // Submit jawaban user
-router.post("/submit", submitProblem);
+router.post("/problem/:problemId/submit", protectRoute, submitProblem);
 
 // Ambil semua problem + status user
 router.get("/:userId/problems", getUserProblems);
@@ -21,6 +24,9 @@ router.get("/:userId/problems", getUserProblems);
 // Ambil leaderboard
 router.get("/leaderboard", getLeaderboard);
 
-router.get("/problems/problem/:id", getProblemById);
+router.get("/problem/:problemId", getProblemById);
+router.get("/problem", getProblems);
+
+router.get("/problemss", protectRoute, getProblemsByUser);
 
 export default router;

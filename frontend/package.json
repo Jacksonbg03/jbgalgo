@@ -21,6 +21,7 @@
     "axios": "^1.12.2",
     "canvas-confetti": "^1.9.3",
     "date-fns": "^4.1.0",
+    "jbgalgo": "file:..",
     "lucide-react": "^0.548.0",
     "react": "^19.1.1",
     "react-countup": "^6.5.3",
