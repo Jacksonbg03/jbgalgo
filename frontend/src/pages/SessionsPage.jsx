@@ -16,6 +16,7 @@ function SessionsPage() {
   const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "" });
 
   const createSessionMutation = useCreateSession();
+  console.log(createSessionMutation)
 
   const { data: activeSessionsData, isLoading: loadingActiveSessions } = useActiveSessions();
   const { data: recentSessionsData, isLoading: loadingRecentSessions } = useMyRecentSessions();
@@ -45,7 +46,6 @@ function SessionsPage() {
 
     return session.host?.clerkId === user.id || session.participant?.clerkId === user.id;
   };
-
   return (
     <>
       <div className="min-h-screen bg-base-300">

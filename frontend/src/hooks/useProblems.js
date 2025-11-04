@@ -33,7 +33,7 @@ export const useProblems = () => {
 
 export const useProblemById = (id) => {
   const result = useQuery({
-    queryKey: ["problem_", id],
+    queryKey: ["problem", id],
     queryFn: () => problemsApi.getProblemById(id),
     enabled: !!id,
     staleTime: 1000 * 60 * 5,
@@ -41,6 +41,30 @@ export const useProblemById = (id) => {
 
   return result;
 };
+
+export const useSolvedProblem = () =>{
+  const result = useQuery({
+    queryKey: ["solvedProblem"],
+    queryFn: ()=> problemsApi.getSolvedProblem,
+    onSuccess: ()=> toast.success("YES KEAMBIL"),
+    onError: (e) => toast.error("Failed to get Data", e)
+  })
+
+  return result;
+}
+
+export const useSubmitProblem = () =>{
+  const result = useMutation({
+    mutationKey: ["submitProblem"],
+    mutationFn: problemsApi.submitProblem,
+    onSuccess: () => toast.success("Congratulations!"),
+    onError: (e) => {
+      toast.error("Failed to submit Problem: ",e)
+    }
+  });
+
+  return result
+}
 
 // export const useSessionById = (id) => {
 //   const result = useQuery({

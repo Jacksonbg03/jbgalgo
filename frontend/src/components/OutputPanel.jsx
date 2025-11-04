@@ -1,8 +1,4 @@
 function OutputPanel({ output, error, isCorrect}) {
-  console.log(output)
-  console.log(error)
-  console.log(isCorrect)
-  console.log(output.length)
   return (
     <div className="h-full bg-base-100 flex flex-col">
       <div className="px-4 py-2 bg-base-200 border-b border-base-300 font-semibold text-sm">

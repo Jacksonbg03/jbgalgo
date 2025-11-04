@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Navbar from "../components/Navbar";
 
+import { useUser } from "@clerk/clerk-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import ProblemDescription from "../components/ProblemDescription";
 import OutputPanel from "../components/OutputPanel";
@@ -10,10 +11,13 @@ import { executeCode } from "../lib/piston";
 
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
-import { useProblems, useProblemById } from "../hooks/useProblems";
+import { useProblems, useProblemById, useSubmitProblem } from "../hooks/useProblems";
+import { Loader2Icon } from "lucide-react";
 
 function ProblemPage() {
   const { id } = useParams();
+  const { user } = useUser();
+
   const navigate = useNavigate();
   const [outputArr, setOutputArr] = useState(null);
 
@@ -23,9 +27,12 @@ function ProblemPage() {
   const [isCorrect, setIsCorrect] = useState(null);
   const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
+  const [solved, setSolved] = useState(false);
 
   const { data: problemsData, isLoadingProblemsData} = useProblems();
   const { data: problem, isLoadingProblem} = useProblemById(id);
+
+  const submitProblemMutation = useSubmitProblem();
 
   // fetch problem from backend
   useEffect(() => {
@@ -36,6 +43,7 @@ function ProblemPage() {
       setOutputArr([])
       setIsCorrect(null);
       setError(null);
+      setSolved(null);
     }
   }, [problem]);
 
@@ -48,10 +56,8 @@ function ProblemPage() {
     setOutputArr([])
     setIsCorrect(null);
     setError(null);
+    setSolved(null);
   };
-
-    // if (isLoadingProblem) return <p>Loading problem...</p>;
-    // if (isErrorProblem) return <p>Failed to load problem.</p>;
 
   const handleProblemChange = (newProblemId) => navigate(`/problem/${newProblemId}`);
 
@@ -102,8 +108,6 @@ function ProblemPage() {
 
     const result = await executeCode(selectedLanguage, code);
     const res_split = result.output.trim().split("\n").filter(Boolean);
-    console.log(result)
-    console.log(res_split)
     const res_arr = res_split.map(line => {
       try {
         return JSON.parse(line);
@@ -126,10 +130,24 @@ function ProblemPage() {
       const expectedOutput = currentProblemId.expectedOutput[selectedLanguage];
       const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
-      if (testsPassed) {
-        triggerConfetti();
-        toast.success("All tests passed! Great job!");
+      if (testsPassed) {        
         setIsCorrect(true);
+        setSolved(true);
+        submitProblemMutation.mutate({
+          userId: user.id,
+          problemId: id,
+          solved: solved
+          }
+        );
+
+        if (submitProblemMutation.isPending){
+          toast.loading("Loading...")
+        }
+        else{
+          triggerConfetti();
+          toast.success("All tests passed! Great job!");
+        }
+
       } else {
         toast.error("Tests failed. Check your output!");
         setIsCorrect(false);
@@ -140,10 +158,12 @@ function ProblemPage() {
     }
   };
 
-  if (isLoadingProblem || isLoadingProblemsData) return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  if (isLoadingProblem || isLoadingProblemsData) return <div className="flex justify-center items-center h-screen">
+    <Loader2Icon className="size-4 animate-spin" />Loading...
+    </div>;
   if (!currentProblemId) return <div className="flex justify-center items-center h-screen text-[60px]">Loading...</div>;
 
-
+  console.log(submitProblemMutation)
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />

@@ -2,31 +2,33 @@ import express from "express";
 import {
   addProblem,
   submitProblem,
-  getUserProblems,
   getLeaderboard,
   getProblemById,
   getProblems,
-  getProblemsByUser
+  getSolvedProblem
 } from "../controllers/problemController.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 
 const router = express.Router();
 
-// Tambah problem baru
-router.post("/add", addProblem);
-
-// Submit jawaban user
-router.post("/problem/:problemId/submit", protectRoute, submitProblem);
-
+// GET API
 // Ambil semua problem + status user
-router.get("/:userId/problems", getUserProblems);
-
-// Ambil leaderboard
-router.get("/leaderboard", getLeaderboard);
+router.get("/problem/:userId/solved", getSolvedProblem);
 
 router.get("/problem/:problemId", getProblemById);
 router.get("/problem", getProblems);
 
-router.get("/problemss", protectRoute, getProblemsByUser);
+// Tambah problem baru
+// router.post("/add", addProblem);
+
+// Submit jawaban user
+// router.post("/problem/:problemId/submit", protectRoute, submitProblem);
+router.post("/problem/:problemId/submit", submitProblem);
+
+
+// // Ambil leaderboard
+// router.get("/leaderboard", getLeaderboard);
+
+
 
 export default router;
