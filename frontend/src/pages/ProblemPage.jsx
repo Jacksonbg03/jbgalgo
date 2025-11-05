@@ -163,60 +163,56 @@ function ProblemPage() {
     }
   };
 
-  if (isLoadingProblem || isLoadingProblemsData) return <div className="flex justify-center items-center h-screen">
-    <Loader2Icon className="size-4 animate-spin" />Loading...
-    </div>;
-  if (!currentProblemId) return <div className="flex justify-center items-center h-screen text-[60px]">Loading...</div>;
+  if (isLoadingProblem || isLoadingProblemsData) return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2Icon className="size-4 animate-spin" />Loading...
+      </div>
+    );
+
+  if (!currentProblemId)
+    return (
+      <div className="flex justify-center items-center h-screen text-[60px]">Loading...</div>
+    );
+
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
 
-      <div className="flex-1">
-        <PanelGroup direction="horizontal">
-          {/* left panel- problem desc */}
-          <Panel defaultSize={40} minSize={30}>
-            <ProblemDescription
-              problem={currentProblemId}
-              currentProblemId={id}
-              onProblemChange={handleProblemChange}
-              allProblems={problemsData}
-              solved={solved}
+      <div className="flex-1 flex flex-col md:flex-row">
+        {/* Left panel - Problem Description */}
+        <div className="md:w-2/5 w-full border-b md:border-b-0 md:border-r border-base-300">
+          <ProblemDescription
+            problem={currentProblemId}
+            currentProblemId={id}
+            onProblemChange={handleProblemChange}
+            allProblems={problemsData}
+            solved={solved}
+          />
+        </div>
+
+        {/* Right panel - Code editor & Output */}
+        <div className="md:w-3/5 w-full flex flex-col">
+          <div className="flex-1">
+            <CodeEditorPanel
+              selectedLanguage={selectedLanguage}
+              code={code}
+              isRunning={isRunning}
+              onLanguageChange={handleLanguageChange}
+              onCodeChange={setCode}
+              onRunCode={handleRunCode}
             />
-          </Panel>
-
-          <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
-
-          {/* right panel- code editor & output */}
-          <Panel defaultSize={60} minSize={30}>
-            <PanelGroup direction="vertical">
-              {/* Top panel - Code editor */}
-              <Panel defaultSize={70} minSize={30}>
-                <CodeEditorPanel
-                  selectedLanguage={selectedLanguage}
-                  code={code}
-                  isRunning={isRunning}
-                  onLanguageChange={handleLanguageChange}
-                  onCodeChange={setCode}
-                  onRunCode={handleRunCode}
-                />
-              </Panel>
-
-              <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
-
-              {/* Bottom panel - Output Panel*/}
-
-              <Panel defaultSize={100} minSize={30}>
-                <OutputPanel 
-                  output={outputArr} 
-                  error={error} 
-                  isCorrect={isCorrect} 
-                  solved={solved} 
-                  handleProblemChange={handleProblemChange}
-                  nextProb={nextProb}/>
-              </Panel>
-            </PanelGroup>
-          </Panel>
-        </PanelGroup>
+          </div>
+          <div className="h-64 md:h-1/3 border-t border-base-300">
+            <OutputPanel
+              output={outputArr}
+              error={error}
+              isCorrect={isCorrect}
+              solved={solved}
+              handleProblemChange={handleProblemChange}
+              nextProb={nextProb}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
