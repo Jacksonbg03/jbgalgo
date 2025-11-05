@@ -16,7 +16,7 @@ export const Leaderboard = ({ data }) => {
 
         <div className="overflow-x-auto">
           <table className="table w-full border border-primary/20">
-            <thead>
+            <thead className='h-18 text-[18px]'>
               <tr className="bg-primary/60 text-[#cfcfcf]">
                 <th className="text-left w-[15%]"><p className="ml-5.5">#</p></th>
                 <th className="text-left">Name</th>
@@ -37,7 +37,11 @@ export const Leaderboard = ({ data }) => {
                 data.map((user, index) => (
                   <tr key={index} className="hover:bg-primary/10 rounded-lg">
                     <td>
-                      {[1, 2, 3].includes(index + 1) ? <Medal rank={index+1} size={35} /> : (<span className='ml-5.5'>{index+1}</span>)}
+                      {[1, 2, 3].includes(index + 1) ? <Medal rank={index+1} size={35} /> : (
+                        <div className='h-[43px] w-full items-center flex'>
+                          <span className='ml-5.5'>{index+1}</span>
+                        </div>
+                        )}
                     </td>
                     <td className="align-middle p-0">
                       <div className="grid items-center h-full">
