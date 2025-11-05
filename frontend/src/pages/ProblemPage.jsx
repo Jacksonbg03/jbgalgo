@@ -163,7 +163,8 @@ function ProblemPage() {
     }
   };
 
-  if (isLoadingProblem || isLoadingProblemsData) return (
+  if (isLoadingProblem || isLoadingProblemsData)
+    return (
       <div className="flex justify-center items-center h-screen">
         <Loader2Icon className="size-4 animate-spin" />Loading...
       </div>
@@ -171,47 +172,103 @@ function ProblemPage() {
 
   if (!currentProblemId)
     return (
-      <div className="flex justify-center items-center h-screen text-[60px]">Loading...</div>
+      <div className="flex justify-center items-center h-screen text-[60px] gap-2"><Loader2Icon className="size-16 animate-spin" />Loading...</div>
     );
 
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
 
-      <div className="flex-1 flex flex-col md:flex-row">
-        {/* Left panel - Problem Description */}
-        <div className="md:w-2/5 w-full border-b md:border-b-0 md:border-r border-base-300">
-          <ProblemDescription
-            problem={currentProblemId}
-            currentProblemId={id}
-            onProblemChange={handleProblemChange}
-            allProblems={problemsData}
-            solved={solved}
-          />
+      {/* Responsive Panels */}
+      <div className="flex-1 h-full">
+        {/* Mobile: vertical stack */}
+        <div className="md:hidden h-full">
+          <PanelGroup direction="vertical">
+            <Panel defaultSize={40} minSize={20}>
+              <ProblemDescription
+                problem={currentProblemId}
+                currentProblemId={id}
+                onProblemChange={handleProblemChange}
+                allProblems={problemsData}
+                solved={solved}
+              />
+            </Panel>
+
+            <PanelResizeHandle className="h-1.5 md:h-2 bg-primary md:bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
+
+            <Panel defaultSize={60} minSize={30}>
+              <PanelGroup direction="vertical">
+                <Panel defaultSize={70} minSize={30}>
+                  <CodeEditorPanel
+                    selectedLanguage={selectedLanguage}
+                    code={code}
+                    isRunning={isRunning}
+                    onLanguageChange={handleLanguageChange}
+                    onCodeChange={setCode}
+                    onRunCode={handleRunCode}
+                  />
+                </Panel>
+
+                <PanelResizeHandle className="h-1.5 md:h-2 bg-primary md:bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
+
+                <Panel defaultSize={30} minSize={20}>
+                  <OutputPanel
+                    output={outputArr}
+                    error={error}
+                    isCorrect={isCorrect}
+                    solved={solved}
+                    handleProblemChange={handleProblemChange}
+                    nextProb={nextProb}
+                  />
+                </Panel>
+              </PanelGroup>
+            </Panel>
+          </PanelGroup>
         </div>
 
-        {/* Right panel - Code editor & Output */}
-        <div className="md:w-3/5 w-full flex flex-col">
-          <div className="flex-1">
-            <CodeEditorPanel
-              selectedLanguage={selectedLanguage}
-              code={code}
-              isRunning={isRunning}
-              onLanguageChange={handleLanguageChange}
-              onCodeChange={setCode}
-              onRunCode={handleRunCode}
-            />
-          </div>
-          <div className="h-64 md:h-1/3 border-t border-base-300">
-            <OutputPanel
-              output={outputArr}
-              error={error}
-              isCorrect={isCorrect}
-              solved={solved}
-              handleProblemChange={handleProblemChange}
-              nextProb={nextProb}
-            />
-          </div>
+        {/* Desktop: horizontal split */}
+        <div className="hidden md:flex h-full">
+          <PanelGroup direction="horizontal">
+            <Panel defaultSize={40} minSize={30}>
+              <ProblemDescription
+                problem={currentProblemId}
+                currentProblemId={id}
+                onProblemChange={handleProblemChange}
+                allProblems={problemsData}
+                solved={solved}
+              />
+            </Panel>
+
+            <PanelResizeHandle className="w-2 bg-base-300 hover:bg-primary transition-colors cursor-col-resize" />
+
+            <Panel defaultSize={60} minSize={30}>
+              <PanelGroup direction="vertical">
+                <Panel defaultSize={70} minSize={30}>
+                  <CodeEditorPanel
+                    selectedLanguage={selectedLanguage}
+                    code={code}
+                    isRunning={isRunning}
+                    onLanguageChange={handleLanguageChange}
+                    onCodeChange={setCode}
+                    onRunCode={handleRunCode}
+                  />
+                </Panel>
+
+                <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
+
+                <Panel defaultSize={30} minSize={20}>
+                  <OutputPanel
+                    output={outputArr}
+                    error={error}
+                    isCorrect={isCorrect}
+                    solved={solved}
+                    handleProblemChange={handleProblemChange}
+                    nextProb={nextProb}
+                  />
+                </Panel>
+              </PanelGroup>
+            </Panel>
+          </PanelGroup>
         </div>
       </div>
     </div>
