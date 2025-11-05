@@ -11,7 +11,7 @@ import { executeCode } from "../lib/piston";
 
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
-import { useProblems, useProblemById, useSubmitProblem } from "../hooks/useProblems";
+import { useProblemById, useSubmitProblem, useSolvedProblem } from "../hooks/useProblems";
 import { Loader2Icon } from "lucide-react";
 
 function ProblemPage() {
@@ -29,10 +29,18 @@ function ProblemPage() {
   const [isRunning, setIsRunning] = useState(false);
   const [solved, setSolved] = useState(false);
 
-  const { data: problemsData, isLoadingProblemsData} = useProblems();
-  const { data: problem, isLoadingProblem} = useProblemById(id);
+  const { data: problemsData, isLoadingProblemsData} = useSolvedProblem(user.id);
+  const { data: problemId, isLoadingProblem} = useProblemById(id);
 
   const submitProblemMutation = useSubmitProblem();
+  const errorData = problemsData !== undefined && problemId !== undefined
+
+  const index = errorData ? problemsData.findIndex(p => p.problemId === problemId.problemId) : -1
+
+  const resProb = index !== -1 ? problemsData.slice(index, index + 2) : [];
+  const problem = errorData ? resProb[0] : problemId
+
+  const nextProb = resProb && resProb.length ? resProb[1].problemId : []
 
   // fetch problem from backend
   useEffect(() => {
@@ -43,11 +51,9 @@ function ProblemPage() {
       setOutputArr([])
       setIsCorrect(null);
       setError(null);
-      setSolved(null);
+      setSolved(problem.solved || null);
     }
   }, [problem]);
-
-  
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
@@ -56,7 +62,7 @@ function ProblemPage() {
     setOutputArr([])
     setIsCorrect(null);
     setError(null);
-    setSolved(null);
+    setSolved(problem.solved || null);
   };
 
   const handleProblemChange = (newProblemId) => navigate(`/problem/${newProblemId}`);
@@ -120,7 +126,6 @@ function ProblemPage() {
     setIsRunning(false);
 
     if (result.error && result.error.trim() !== ""){
-      toast.error("Your code has an error!");
       setIsCorrect(false);
     }
 
@@ -130,13 +135,13 @@ function ProblemPage() {
       const expectedOutput = currentProblemId.expectedOutput[selectedLanguage];
       const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
-      if (testsPassed) {        
+      if (testsPassed) {
         setIsCorrect(true);
         setSolved(true);
         submitProblemMutation.mutate({
           userId: user.id,
           problemId: id,
-          solved: solved
+          solved: true
           }
         );
 
@@ -162,8 +167,6 @@ function ProblemPage() {
     <Loader2Icon className="size-4 animate-spin" />Loading...
     </div>;
   if (!currentProblemId) return <div className="flex justify-center items-center h-screen text-[60px]">Loading...</div>;
-
-  console.log(submitProblemMutation)
   return (
     <div className="h-screen bg-base-100 flex flex-col">
       <Navbar />
@@ -177,6 +180,7 @@ function ProblemPage() {
               currentProblemId={id}
               onProblemChange={handleProblemChange}
               allProblems={problemsData}
+              solved={solved}
             />
           </Panel>
 
@@ -201,8 +205,14 @@ function ProblemPage() {
 
               {/* Bottom panel - Output Panel*/}
 
-              <Panel defaultSize={30} minSize={30}>
-                <OutputPanel output={outputArr} error={error} isCorrect={isCorrect}/>
+              <Panel defaultSize={100} minSize={30}>
+                <OutputPanel 
+                  output={outputArr} 
+                  error={error} 
+                  isCorrect={isCorrect} 
+                  solved={solved} 
+                  handleProblemChange={handleProblemChange}
+                  nextProb={nextProb}/>
               </Panel>
             </PanelGroup>
           </Panel>

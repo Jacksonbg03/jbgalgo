@@ -4,9 +4,10 @@ import Navbar from "../components/Navbar";
 import { useSolvedProblem} from "../hooks/useProblems";
 import { ChevronRightIcon, Code2Icon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
-import { Checkbox } from "../components/Checkbox";
 import { useUser } from "@clerk/clerk-react";
 import { useState, useMemo } from "react";
+import { FilterSection } from "../components/FilterSection";
+import { Stat } from "../components/Stat";
 
 function ProblemsPage() {
   const { user } = useUser();
@@ -79,133 +80,118 @@ const filteredProblems = useMemo(() => {
     <div className="min-h-screen bg-base-200">
       <Navbar />
 
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="max-w-7xl mx-auto px-4 py-12">
         {/* HEADER */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2">Practice Problems</h1>
-          <p className="text-base-content/70">
+        <div className="mb-8 text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2">Practice Problems</h1>
+          <p className="text-base-content/70 text-sm md:text-base">
             Sharpen your coding skills with these curated problems
           </p>
         </div>
 
-        {/* PROBLEMS LIST */}
-        <div className="w-full flex gap-10 items-start">
-          <div className="w-[80%] space-y-4">
+        {/* MAIN CONTENT */}
+        <div className="flex flex-col lg:flex-row gap-10 items-start">
+          {/* PROBLEM LIST */}
+          <div className="w-full lg:w-[80%] space-y-4">
             {filteredProblems.length === 0 ? (
               <div className="flex-1 flex items-center justify-center py-12 text-lg text-base-content/70">
                 Problem not found :(
               </div>
             ) : (
-            filteredProblems.map((problem) => (
-              <Link
-                key={problem.problemId}
-                to={`/problem/${problem.problemId}`}
-                className="card bg-base-100 hover:scale-[1.01] transition-transform"
-              >
-                <div className="card-body">
-                  <div className="flex items-center justify-between gap-4">
-                    {/* LEFT SIDE */}
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                          <Code2Icon className="size-6 text-primary" />
-                        </div>
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <h2 className="text-xl font-bold">{problem.title}</h2>
-                            <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
-                              {problem.difficulty}
-                            </span>
+              filteredProblems.map((problem) => (
+                <Link
+                  key={problem.problemId}
+                  to={`/problem/${problem.problemId}`}
+                  className="card bg-base-100 hover:scale-[1.01] transition-transform"
+                >
+                  <div className="card-body">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      {/* LEFT SIDE */}
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="size-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                            <Code2Icon className="size-6 text-primary" />
                           </div>
-                          <p className="text-sm text-base-content/60"> {problem.category.join(" | ")}</p>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <h2 className="text-lg sm:text-xl font-bold">{problem.title}</h2>
+                              <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
+                                {problem.difficulty}
+                              </span>
+                            </div>
+                            <p className="text-sm text-base-content/60">
+                              {problem.category.join(" | ")}
+                            </p>
+                          </div>
                         </div>
+                        <p className="text-sm sm:text-base text-base-content/80 mb-3">
+                          {problem.description.text}
+                        </p>
                       </div>
-                      <p className="text-base-content/80 mb-3">{problem.description.text}</p>
-                    </div>
-                    {/* RIGHT SIDE */}
 
-                    <div className="flex items-center gap-2 text-primary">
-                      <span className="font-medium">Solve</span>
-                      <ChevronRightIcon className="size-5" />
+                      {/* RIGHT SIDE */}
+                      <div className="flex items-center gap-2 text-primary self-end sm:self-auto">
+                        <span className="font-medium">Solve</span>
+                        <ChevronRightIcon className="size-5" />
+                      </div>
                     </div>
                   </div>
-                </div>
-              </Link>
-            )))}
+                </Link>
+              ))
+            )}
           </div>
-          <div className="w-[20%] sticky top-20">
-            <div className="container mt-4 border-b-1 pb-4 border-[#dbdbdb]">
-              <h4 className="text-[14px] font-bold mb-1 text-[#dbdbdb]">STATUS</h4>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.status.solved} onChange={()=> handleCheckboxChange("status", "solved")}/>
-                <span className="text-[14px] font-medium">Solved</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.status.unsolved} onChange={()=> handleCheckboxChange("status", "unsolved")}/>
-                <span className="text-[14px] font-medium">Unsolved</span>
-              </div>
-            </div>
-            <div className="container mt-4 border-b-1 pb-4 border-[#dbdbdb]">
-              <h4 className="text-[14px] font-bold mb-1 text-[#dbdbdb]">DIFFICULTY</h4>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.difficulty.Easy} onChange={()=> handleCheckboxChange("difficulty", "Easy")}/>
-                <span className="text-[14px] font-medium">Easy</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.difficulty.Medium} onChange={()=> handleCheckboxChange("difficulty", "Medium")}/>
-                <span className="text-[14px] font-medium">Medium</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.difficulty.Hard} onChange={()=> handleCheckboxChange("difficulty", "Hard")}/>
-                <span className="text-[14px] font-medium">Hard</span>
-              </div>
-            </div>
-            <div className="container mt-4 pb-4">
-              <h4 className="text-[14px] font-bold mb-1 text-[#dbdbdb]">CATEGORY</h4>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.category["String"]} onChange={()=> handleCheckboxChange("category", "String")}/>
-                <span className="text-[14px] font-medium">String</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.category["Array"]} onChange={()=> handleCheckboxChange("category", "Array")}/>
-                <span className="text-[14px] font-medium">Array</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.category["Hash Table"]} onChange={()=> handleCheckboxChange("category", "Hash Table")}/>
-                <span className="text-[14px] font-medium">Hash Table</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.category["Two Pointers"]} onChange={()=> handleCheckboxChange("category", "Two Pointers")}/>
-                <span className="text-[14px] font-medium">Two Pointers</span>
-              </div>
-              <div className="flex gap-2 py-1">
-                <Checkbox isChecked={filters.category["Dynamic Programming"]} onChange={()=> handleCheckboxChange("category", "Dynamic Programming")}/>
-                <span className="text-[14px] font-medium">Dynamic Programming</span>
-              </div>
-            </div>
+
+          {/* FILTER SIDEBAR */}
+          <div className="hidden lg:block w-full lg:w-[20%] lg:sticky top-20 bg-base-300/10 p-4 rounded-xl shadow-sm">
+            <FilterSection
+              title="STATUS"
+              options={[
+                { label: "Solved", value: "solved", type: "status" },
+                { label: "Unsolved", value: "unsolved", type: "status" },
+              ]}
+              filters={filters}
+              onChange={handleCheckboxChange}
+            />
+
+            <FilterSection
+              title="DIFFICULTY"
+              options={[
+                { label: "Easy", value: "Easy", type: "difficulty" },
+                { label: "Medium", value: "Medium", type: "difficulty" },
+                { label: "Hard", value: "Hard", type: "difficulty" },
+              ]}
+              filters={filters}
+              onChange={handleCheckboxChange}
+            />
+
+            <FilterSection
+              title="CATEGORY"
+              options={Object.keys(filters.category).map((key) => ({
+                label: key,
+                value: key,
+                type: "category",
+              }))}
+              filters={filters}
+              onChange={handleCheckboxChange}
+            />
           </div>
         </div>
 
         {/* STATS FOOTER */}
         <div className="mt-12 card bg-base-100 shadow-lg">
           <div className="card-body">
-            <div className="stats stats-vertical lg:stats-horizontal">
-              <div className="stat">
-                <div className="stat-title">Total Problems</div>
-                <div className="stat-value text-primary">{filteredProblems.length}</div>
+            <div className="flex flex-wrap justify-center items-stretch text-center gap-6 sm:gap-10">
+              <div className="flex-1 min-w-[120px] max-w-[200px]">
+                <Stat title="Total Problems" value={filteredProblems.length} color="text-primary" />
               </div>
-
-              <div className="stat">
-                <div className="stat-title">Easy</div>
-                <div className="stat-value text-success">{easyProblemsCount}</div>
+              <div className="flex-1 min-w-[120px] max-w-[200px]">
+                <Stat title="Easy" value={easyProblemsCount} color="text-success" />
               </div>
-              <div className="stat">
-                <div className="stat-title">Medium</div>
-                <div className="stat-value text-warning">{mediumProblemsCount}</div>
+              <div className="flex-1 min-w-[120px] max-w-[200px]">
+                <Stat title="Medium" value={mediumProblemsCount} color="text-warning" />
               </div>
-              <div className="stat">
-                <div className="stat-title">Hard</div>
-                <div className="stat-value text-error">{hardProblemsCount}</div>
+              <div className="flex-1 min-w-[120px] max-w-[200px]">
+                <Stat title="Hard" value={hardProblemsCount} color="text-error" />
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 import React from 'react'
 import { Trophy } from "lucide-react";
+import { Medal } from './Medal';
 
 export const Leaderboard = ({ data }) => {
   console.log(data)
@@ -17,7 +18,7 @@ export const Leaderboard = ({ data }) => {
           <table className="table w-full border border-primary/20">
             <thead>
               <tr className="bg-primary/60 text-[#cfcfcf]">
-                <th className="text-left">#</th>
+                <th className="text-left w-[15%]"><p className="ml-5.5">#</p></th>
                 <th className="text-left">Name</th>
                 <th className="text-center">Total</th>
                 <th className="text-center">Easy</th>
@@ -35,14 +36,20 @@ export const Leaderboard = ({ data }) => {
               ) : (
                 data.map((user, index) => (
                   <tr key={index} className="hover:bg-primary/10 rounded-lg">
-                    <td>{index + 1}</td>
-                    <td className="flex items-center gap-2">
-                      <img
-                        src={user.profileImage}
-                        alt={user.name}
-                        className="w-8 h-8 rounded-full object-cover"
-                      />
-                      {user.name}
+                    <td>
+                      {[1, 2, 3].includes(index + 1) ? <Medal rank={index+1} size={35} /> : (<span className='ml-5.5'>{index+1}</span>)}
+                    </td>
+                    <td className="align-middle p-0">
+                      <div className="grid items-center h-full">
+                        <div className="flex items-center gap-3 px-3 py-2">
+                          <img
+                            src={user.profileImage}
+                            alt={user.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <span>{user.name}</span>
+                        </div>
+                      </div>
                     </td>
                     <td className="text-center">{user.totalSolved}</td>
                     <td className="text-center">{user.easy}</td>

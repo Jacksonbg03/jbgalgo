@@ -42,3 +42,19 @@ body{
   0%, 50% { opacity: 1; }
   50.1%, 100% { opacity: 0; }
 }
+
+@keyframes medal-breath {
+  0%, 100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+.medal-glow {
+  animation: medal-breath 2.8s ease-in-out infinite;
+  mix-blend-mode: screen;
+}

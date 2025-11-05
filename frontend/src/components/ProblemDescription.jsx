@@ -1,16 +1,23 @@
 import { getDifficultyBadgeClass } from "../lib/utils";
-function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems }) {
+function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved }) {
   return (
     <div className="h-full overflow-y-auto bg-base-200">
       {/* HEADER SECTION */}
       <div className="p-6 bg-base-100 border-b border-base-300">
-        <div className="flex items-start justify-between mb-3">
-          <h1 className="text-3xl font-bold text-base-content">{problem.title}</h1>
-          <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
-            {problem.difficulty}
-          </span>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex gap-3 items-center">
+            <h1 className="text-3xl font-bold text-base-content">{problem.title}</h1>
+            { solved === true ?
+              (
+                <span className="badge bg-green-500/20 text-green-400 border border-green-500/30">Solved</span>
+              ) : ""
+            }
+          </div>
+            <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
+              {problem.difficulty}
+            </span>
         </div>
-        <p className="text-base-content/60">{problem.category}</p>
+        <p className="text-base-content/60">{problem.category.join(" | ")}</p>
 
         {/* Problem selector */}
         <div className="mt-4">

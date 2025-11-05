@@ -16,7 +16,6 @@ function SessionsPage() {
   const [roomConfig, setRoomConfig] = useState({ problem: "", difficulty: "" });
 
   const createSessionMutation = useCreateSession();
-  console.log(createSessionMutation)
 
   const { data: activeSessionsData, isLoading: loadingActiveSessions } = useActiveSessions();
   const { data: recentSessionsData, isLoading: loadingRecentSessions } = useMyRecentSessions();
@@ -48,36 +47,47 @@ function SessionsPage() {
   };
   return (
     <>
-      <div className="min-h-screen bg-base-300">
+      <div className="min-h-screen bg-base-200">
         <Navbar />
-        
 
-        {/* Grid layout */}
-        <div className="container mx-auto px-6 pb-16">
-            <div className="max-w-6xl py-12">
-            {/* HEADER */}
-                <h1 className="text-4xl font-bold mb-2">Interview Sessions</h1>
-                <p className="text-base-content/70">
-                    Prepare for real interviews with guided coding sessions
-                </p>
-            </div>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="max-w-7xl mx-auto px-4 py-12">
+          {/* HEADER */}
+          <div className="mb-8 text-center md:text-left">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Interview Sessions</h1>
+            <p className="text-base-content/70 text-sm md:text-base">
+              Prepare for real interviews with guided coding sessions
+            </p>
+          </div>
+
+          {/* GRID SECTION */}
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-6">
             <StatsCards
               activeSessionsCount={activeSessions.length}
               recentSessionsCount={recentSessions.length}
             />
-            <ActiveSessions
-              sessions={activeSessions}
-              isLoading={loadingActiveSessions}
-              isUserInSession={isUserInSession}
-              onCreateSession={() => setShowCreateModal(true)}
-            />
+
+            {/* Buat ActiveSessions occupy dua kolom biar seimbang */}
+            <div className="lg:col-span-2">
+              <ActiveSessions
+                sessions={activeSessions}
+                isLoading={loadingActiveSessions}
+                isUserInSession={isUserInSession}
+                onCreateSession={() => setShowCreateModal(true)}
+              />
+            </div>
           </div>
 
-          <RecentSessions sessions={recentSessions} isLoading={loadingRecentSessions} />
+          {/* RECENT SESSIONS SECTION */}
+          <div className="max-w-7xl mx-auto mt-10">
+            <RecentSessions
+              sessions={recentSessions}
+              isLoading={loadingRecentSessions}
+            />
+          </div>
         </div>
       </div>
 
+      {/* MODAL */}
       <CreateSessionModal
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
@@ -88,6 +98,7 @@ function SessionsPage() {
       />
     </>
   );
+
 }
 
 export default SessionsPage;

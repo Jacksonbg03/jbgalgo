@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery} from "@tanstack/react-query";
 import { userApi } from "../api/users";
 
 export const useLeaderboard= () => {
@@ -9,3 +9,4 @@ export const useLeaderboard= () => {
 
   return result;
 };
+
