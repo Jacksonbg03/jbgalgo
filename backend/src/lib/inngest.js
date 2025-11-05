@@ -43,4 +43,31 @@ const deleteUserFromDB = inngest.createFunction(
   }
 );
 
-export const functions = [syncUser, deleteUserFromDB];
+const updateUser = inngest.createFunction(
+  { id: "update-user" },
+  { event: "clerk/user.updated" },
+  async ({ event }) => {
+    await connectDB();
+
+    const { id, email_addresses, first_name, last_name, image_url } = event.data;
+
+    const existingUser = await User.findOne({ clerkId: id });
+    if (!existingUser) return;
+
+    existingUser.name = `${first_name || ""} ${last_name || ""}`;
+    existingUser.email = email_addresses?.[0]?.email_address || existingUser.email;
+    existingUser.profileImage = image_url || existingUser.profileImage;
+
+    await existingUser.save();
+
+    await upsertStreamUser({
+      id: existingUser.clerkId.toString(),
+      name: existingUser.name,
+      image: existingUser.profileImage,
+    });
+
+    console.log(`User ${id} updated in MongoDB`);
+  }
+);
+
+export const functions = [syncUser, deleteUserFromDB, updateUser];
