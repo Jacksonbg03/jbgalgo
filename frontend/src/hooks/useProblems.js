@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { problemsApi } from "../api/problems";
 
 export const useProblems = () => {
@@ -26,8 +26,6 @@ export const useSolvedProblem = (userId) =>{
   const result = useQuery({
     queryKey: ["solvedProblem"],
     queryFn: ()=> problemsApi.getSolvedProblem(userId),
-    onSuccess: ()=> toast.success("YES KEAMBIL"),
-    onError: (e) => toast.error("Failed to get Data", e)
   })
 
   return result;

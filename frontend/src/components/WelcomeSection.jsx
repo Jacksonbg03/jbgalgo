@@ -12,7 +12,7 @@ function WelcomeSection(user) {
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 mb-4 justify-center sm:justify-start">
               <Typewriter
-                text={`Welcome back, ${user?.firstName || "there"}!`}
+                text={`Welcome back, ${user?.user?.firstName || "there"}!`}
               />
             </div>
             <p className="text-xl text-base-content/60 ml-0 sm:ml-1">

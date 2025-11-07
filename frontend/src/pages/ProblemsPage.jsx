@@ -1,20 +1,26 @@
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import Navbar from "../components/Navbar";
 
 import { useSolvedProblem} from "../hooks/useProblems";
-import { ChevronRightIcon, Code2Icon } from "lucide-react";
+import { ChevronRightIcon, CirclePlus, Code2Icon, Plus } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { useState, useMemo } from "react";
 import { FilterSection } from "../components/FilterSection";
 import { Stat } from "../components/Stat";
+import { useNavigate } from "react-router";
+import { useGetUser } from "../hooks/useUsers";
 
 function ProblemsPage() {
   const { user } = useUser();
   const { data:solvedProblems } = useSolvedProblem(user.id);
-  
+  const { data: userData } = useGetUser(user.id);
+
+  const userz = userData?.user || []
+
+  const navigate = useNavigate();
   const problems = solvedProblems
-  
+
   const [filters, setFilters] = useState({
     status: { solved: false, unsolved: false },
     difficulty: { Easy: false, Medium: false, Hard: false },
@@ -79,11 +85,30 @@ const filteredProblems = useMemo(() => {
 
       <div className="max-w-7xl mx-auto px-4 py-12">
         {/* HEADER */}
-        <div className="mb-8 text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Practice Problems</h1>
-          <p className="text-base-content/70 text-sm md:text-base">
-            Sharpen your coding skills with these curated problems
-          </p>
+        <div className="flex flex-col lg:flex-row gap-10 items-start">
+
+        <div className="w-full lg:w-[80%] space-y-4">
+          <div className="flex justify-between">
+            <div className="mb-8 text-center md:text-left w-full">
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">Practice Problems</h1>
+              <p className="text-base-content/70 text-sm md:text-base">
+                Sharpen your coding skills with these curated problems
+              </p>
+            </div>
+            {userz.role === "Admin" ? (
+              <button
+              onClick={() => navigate("/problems/add")}
+              className=" items-center justify-center h-[40px] w-60 hidden sm:flex mt-8 sm:mt-0 group px-4 py-4 bg-gradient-to-r from-[#FFC107] via-[#FF6F00] via-[#FF7F50] to-primary rounded-lg transition-all duration-200 hover:opacity-90"
+            >
+              <div className="flex items-center gap-3 text-white font-bold text-lg">
+                <span className="text-[16px]">Add Problem</span>
+                <CirclePlus className="w-5 h-5" />
+              </div>
+            </button>
+            ): ""}
+          </div>
+        </div>
+        <div className="hidden lg:block w-full lg:w-[20%] lg:sticky top-20 bg-base-300/10 p-4 rounded-xl shadow-sm"></div>
         </div>
 
         {/* MAIN CONTENT */}

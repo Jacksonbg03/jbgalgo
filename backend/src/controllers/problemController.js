@@ -72,17 +72,6 @@ export const getSolvedProblem = async (req, res) => {
   }
 };
 
-// Leaderboard
-export const getLeaderboard = async (req, res) => {
-  try {
-    const leaderboard = await User.getLeaderboard(10);
-    return res.json({ leaderboard });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ message: "Server error" });
-  }
-};
-
 export const getProblemById = async (req, res) => {
   try {
     const { problemId } = req.params;
@@ -102,7 +91,7 @@ export const getProblemById = async (req, res) => {
 
 export const getProblems = async (req, res) =>{
   try {
-    const problems = await Problems.find();
+    const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});;
     if (!problems) return res.status(404).json({error: "Problems not found"})
     
       return res.json(problems)

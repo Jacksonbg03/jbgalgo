@@ -3,7 +3,7 @@ import { Code2Icon, LoaderIcon, PlusIcon } from "lucide-react";
 import { useProblems } from "../hooks/useProblems";
 
 
-function CreateSessionModal({
+function CreateProblemModal({
   isOpen,
   onClose,
   roomConfig,
@@ -92,4 +92,4 @@ function CreateSessionModal({
     </div>
   );
 }
-export default CreateSessionModal;
+export default CreateProblemModal;

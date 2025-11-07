@@ -24,14 +24,9 @@ export const problemsApi = {
   },
 
   // // Tambah problem baru (admin)
-  // addProblem: async (data) => {
-  //   const response = await axiosInstance.post("/problems/add", data);
-  //   return response.data;
-  // },
+  addProblem: async (data) => {
+    const response = await axiosInstance.post("/problems/add", data);
+    return response.data;
+  },
 
-  // Ambil leaderboard
-  // getLeaderboard: async () => {
-  //   const response = await axiosInstance.get("/problems/leaderboard");
-  //   return response.data;
-  // },
 };

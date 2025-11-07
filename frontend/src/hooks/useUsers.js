@@ -10,3 +10,12 @@ export const useLeaderboard= () => {
   return result;
 };
 
+export const useGetUser = (userId) => {
+  const result = useQuery({
+    queryKey: ["user"],
+    queryFn: ()=> userApi.getUser(userId)
+  })
+
+  return result;
+}
+

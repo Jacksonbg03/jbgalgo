@@ -6,7 +6,6 @@ import Navbar from "../components/Navbar";
 import WelcomeSection from "../components/WelcomeSection";
 import RecentSessions from "../components/RecentSessions";
 import { Leaderboard } from "../components/Leaderboard";
-import { CreateProblem } from "../components/CreateProblem";
 
 function DashboardPage() {
   const { user } = useUser();
@@ -19,11 +18,6 @@ function DashboardPage() {
     <div className="min-h-screen bg-base-300">
       <Navbar />
       <WelcomeSection user={user}/>
-
-      {user.role === "Admin" ?
-      (<div className="max-w-7xl mx-auto px-6 pb-16 flex flex-col gap-2">
-         <CreateProblem/>
-      </div>) : ""}
 
       <div className="max-w-7xl mx-auto px-6 pb-16 flex flex-col gap-2">
         <Leaderboard data={leaderData} />

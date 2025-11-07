@@ -5,7 +5,6 @@ export const Checkbox = ({ isChecked = false, onChange }) => {
     onChange(!e.target.checked);
   };
 
-  console.log(isChecked)
   return (
     <input
     type="checkbox"

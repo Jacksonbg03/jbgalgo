@@ -8,10 +8,14 @@ import ProblemPage from "./pages/ProblemPage";
 import ProblemsPage from "./pages/ProblemsPage";
 import SessionPage from "./pages/SessionPage";
 import SessionsPage from "./pages/SessionsPage";
+import { AddProblemPage } from "./pages/CreateProblemPage";
+import { useGetUser } from "./hooks/useUsers";
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
-
+  const { user } = useUser();
+  const {data: userData} = useGetUser(user?.id || [])
+  const userz = userData?.user || []
   // this will get rid of the flickering effect
   if (!isLoaded) return null;
 
@@ -26,6 +30,7 @@ function App() {
 
         <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to={"/"} />} />
         <Route path="/problem/:id" element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />} />
+        <Route path="/problems/add" element={isSignedIn && userz.role === "Admin" ? <AddProblemPage /> : <Navigate to={"/"} />} />
       </Routes>
 
       <Toaster toastOptions={{ duration: 3000 }} />
