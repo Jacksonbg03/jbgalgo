@@ -15,7 +15,7 @@ function OutputPanel({ output, error, isCorrect, solved, handleProblemChange, ne
                 <p className="text-white text-[14px]">Challenge completed. Skill unlocked, confidence upgraded. 🔥Ready for the next one?</p>
               </div>
               <div className="w-[20%] text-end">
-                <button className="btn bg-white btn-sm gap-2 text-black" onClick={()=>handleProblemChange(nextProb)}>Next Challenge</button>
+                {nextProb.length ? (<button className="btn bg-white btn-sm gap-2 text-black" onClick={()=>handleProblemChange(nextProb)}>Next Challenge</button>) : ""}
               </div>
             </div>
             {output.map((o, i) => {

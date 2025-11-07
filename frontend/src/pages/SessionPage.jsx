@@ -2,7 +2,6 @@ import { useUser } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useEndSession, useJoinSession, useSessionById } from "../hooks/useSessions";
-import { PROBLEMS } from "../data/problems";
 import { executeCode } from "../lib/piston";
 import Navbar from "../components/Navbar";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
@@ -14,15 +13,21 @@ import OutputPanel from "../components/OutputPanel";
 import useStreamClient from "../hooks/useStreamClient";
 import { StreamCall, StreamVideo } from "@stream-io/video-react-sdk";
 import VideoCallUI from "../components/VideoCallUI";
+import { useProblems } from "../hooks/useProblems";
+import toast from "react-hot-toast";
+import confetti from "canvas-confetti";
 
 function SessionPage() {
   const navigate = useNavigate();
   const { id } = useParams();
   const { user } = useUser();
-  const [output, setOutput] = useState(null);
+  const [output, setOutput] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [isCorrect, setIsCorrect] = useState(null);
+  const [error, setError] = useState(null);
 
   const { data: sessionData, isLoading: loadingSession, refetch } = useSessionById(id);
+  const { data:problems } = useProblems();
 
   const joinSessionMutation = useJoinSession();
   const endSessionMutation = useEndSession();
@@ -39,11 +44,11 @@ function SessionPage() {
   );
 
   // find the problem data based on session problem title
-  const problemData = session?.problem
-    ? Object.values(PROBLEMS).find((p) => p.title === session.problem)
+  const problemData = session?.problem && problems?.length
+    ? problems.find((p) => p.title === session.problem)
     : null;
 
-  const [selectedLanguage, setSelectedLanguage] = useState("javascript");
+  const [selectedLanguage, setSelectedLanguage] = useState("python");
   const [code, setCode] = useState(problemData?.starterCode?.[selectedLanguage] || "");
 
   // auto-join session if user is not already a participant and not the host
@@ -70,22 +75,95 @@ function SessionPage() {
     }
   }, [problemData, selectedLanguage]);
 
+  const normalizeOutput = (output) => {
+    // normalize output for comparison (trim whitespace, handle different spacing)
+    return output
+      .trim()
+      .split("\n")
+      .map((line) =>
+        line
+          .trim()
+          // remove spaces after [ and before ]
+          .replace(/\[\s+/g, "[")
+          .replace(/\s+\]/g, "]")
+          // normalize spaces around commas to single space after comma
+          .replace(/\s*,\s*/g, ",")
+      )
+      .filter((line) => line.length > 0)
+      .join("\n");
+  };
+
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
     // use problem-specific starter code
     const starterCode = problemData?.starterCode?.[newLang] || "";
     setCode(starterCode);
-    setOutput(null);
+    setOutput([]);
+    setIsCorrect(null);
+    setError(null);
   };
 
   const handleRunCode = async () => {
     setIsRunning(true);
-    setOutput(null);
+    setOutput([]);
+    setIsCorrect(null);
+    setError(null);
 
-    const result = await executeCode(selectedLanguage, code);
-    setOutput(result);
+    const hiddenInputs = problemData.hiddenInputs;
+    const expectedOutput = problemData.expectedOutput[selectedLanguage].trim().split("\n")
+    let allOutputs = [];
+    let allErrors = []
+    let allPassed = true;
+
+    for (let i = 0; i < hiddenInputs.length; i++) {
+      const inputData = hiddenInputs[i].replace(/\\n/g, "\n");
+      const result = await executeCode(selectedLanguage, code, inputData);
+
+      if (result.error && result.error.trim() !== "") {
+        allErrors.push(result.error);
+        allPassed = false;
+        break;
+      }
+
+      const actualOutput = result.output.trim();
+      allOutputs.push(actualOutput);
+
+      const normalizedActual = normalizeOutput(actualOutput);
+      const normalizedExpected = normalizeOutput(expectedOutput[i]);
+
+      if (normalizedActual !== normalizedExpected) {
+        allPassed = false;
+      }
+    }
+
+    setOutput(allOutputs);
+    setError(allErrors.join("\n"));
     setIsRunning(false);
+    setIsCorrect(allPassed);
+
+    const triggerConfetti = () => {
+        confetti({
+          particleCount: 80,
+          spread: 250,
+          origin: { x: 0.2, y: 0.6 },
+        })
+        confetti({
+          particleCount: 80,
+          spread: 250,
+          origin: { x: 0.8, y: 0.6 },
+        });
+      };
+
+
+    if (allPassed) {
+      triggerConfetti();
+      toast.success("All test cases passed!");
+    } else if (allErrors.length > 0) {
+      toast.error("Code execution error!");
+    } else {
+      toast.error("Some test cases failed!");
+    }
   };
 
   const handleEndSession = () => {
@@ -94,6 +172,8 @@ function SessionPage() {
       endSessionMutation.mutate(id, { onSuccess: () => navigate("/dashboard") });
     }
   };
+
+  console.log(output)
 
   return (
     <div className="h-screen bg-base-100 flex flex-col">
@@ -245,7 +325,14 @@ function SessionPage() {
                   <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
                   <Panel defaultSize={30} minSize={15}>
-                    <OutputPanel output={output} />
+                    <OutputPanel
+                      output={output}
+                      error={error}
+                      isCorrect={isCorrect}
+                      solved={true}
+                      handleProblemChange={false}
+                      nextProb={false}
+                    />
                   </Panel>
                 </PanelGroup>
               </Panel>

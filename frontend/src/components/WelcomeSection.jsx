@@ -1,10 +1,8 @@
-import { useUser } from "@clerk/clerk-react";
 import { ArrowRightIcon, SparklesIcon, ZapIcon } from "lucide-react";
 import Typewriter from "./TypeWriter";
 import { useNavigate } from "react-router";
 
-function WelcomeSection() {
-  const { user } = useUser();
+function WelcomeSection(user) {
   const navigate = useNavigate();
 
   return (

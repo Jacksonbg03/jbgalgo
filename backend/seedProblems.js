@@ -24,6 +24,7 @@ const seed = async () => {
           examples: p.examples,
           constraints: p.constraints,
           starterCode: p.starterCode,
+          hiddenInputs: p.hiddenInputs,
           expectedOutput: p.expectedOutput,
         });
         console.log(`Seeded: ${p.title}`);

@@ -7,7 +7,7 @@ export const addProblem = async (req, res) => {
     const existing = await Problems.findOne({ problemId: data.problemId });
     if (existing) return res.status(400).json({ message: "Problem already exists" });
 
-    const problem = await Problem.create(data);
+    const problem = await Problems.create(data);
     return res.status(201).json({ message: "Problem added", problem });
   } catch (err) {
     console.error(err);
@@ -54,7 +54,7 @@ export const getSolvedProblem = async (req, res) => {
     const user = await User.findOne({clerkId: userId}).populate("solvedProblems.problem");
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const problems = await Problems.find();
+    const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});
     const results = problems.map((p) => {
     const status = user.solvedProblems.find(
         (up) => up.problem._id.toString() === p._id.toString()

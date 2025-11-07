@@ -40,7 +40,7 @@ function ProblemPage() {
   const resProb = index !== -1 ? problemsData.slice(index, index + 2) : [];
   const problem = errorData ? resProb[0] : problemId
 
-  const nextProb = resProb && resProb.length ? resProb[1].problemId : []
+  const nextProb = resProb && resProb.length ? (resProb[1] ? resProb[1].problemId : []) : [];
 
   // fetch problem from backend
   useEffect(() => {
@@ -99,67 +99,58 @@ function ProblemPage() {
       .join("\n");
   };
 
-  const checkIfTestsPassed = (actualOutput, expectedOutput) => {
-    const normalizedActual = normalizeOutput(actualOutput);
-    const normalizedExpected = normalizeOutput(expectedOutput);
-
-    return normalizedActual == normalizedExpected;
-  };
-
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutputArr([])
     setIsCorrect(null);
     setError(null);
 
-    const result = await executeCode(selectedLanguage, code);
-    const res_split = result.output.trim().split("\n").filter(Boolean);
-    const res_arr = res_split.map(line => {
-      try {
-        return JSON.parse(line);
-      } catch {
-        return line;
-      }
-    });
-    setError(result.error || "");
-    setOutputArr(res_arr || []);
-    setIsRunning(false);
+    const hiddenInputs = currentProblemId.hiddenInputs;
+    const expectedOutput = currentProblemId.expectedOutput[selectedLanguage].trim().split("\n")
+    let allOutputs = [];
+    let allErrors = []
+    let allPassed = true;
 
-    if (result.error && result.error.trim() !== ""){
-      setIsCorrect(false);
+    for (let i = 0; i < hiddenInputs.length; i++) {
+      const inputData = hiddenInputs[i].replace(/\\n/g, "\n");
+      const result = await executeCode(selectedLanguage, code, inputData);
+
+      if (result.error && result.error.trim() !== "") {
+        allErrors.push(result.error);
+        allPassed = false;
+        break;
+      }
+
+      const actualOutput = result.output.trim();
+      allOutputs.push(actualOutput);
+
+      const normalizedActual = normalizeOutput(actualOutput);
+      const normalizedExpected = normalizeOutput(expectedOutput[i]);
+
+      if (normalizedActual !== normalizedExpected) {
+        allPassed = false;
+      }
     }
 
-    // check if code executed successfully and matches expected output
+    setOutputArr(allOutputs);
+    setError(allErrors.join("\n"));
+    setIsRunning(false);
+    setIsCorrect(allPassed);
 
-    if (result.success) {
-      const expectedOutput = currentProblemId.expectedOutput[selectedLanguage];
-      const testsPassed = checkIfTestsPassed(result.output, expectedOutput);
 
-      if (testsPassed) {
-        setIsCorrect(true);
-        setSolved(true);
-        submitProblemMutation.mutate({
-          userId: user.id,
-          problemId: id,
-          solved: true
-          }
-        );
-
-        if (submitProblemMutation.isPending){
-          toast.loading("Loading...")
-        }
-        else{
-          triggerConfetti();
-          toast.success("All tests passed! Great job!");
-        }
-
-      } else {
-        toast.error("Tests failed. Check your output!");
-        setIsCorrect(false);
-      }
+    if (allPassed) {
+      triggerConfetti();
+      toast.success("All test cases passed!");
+      setSolved(true);
+      submitProblemMutation.mutate({
+        userId: user.id,
+        problemId: id,
+        solved: true,
+      });
+    } else if (allErrors.length > 0) {
+      toast.error("Code execution error!");
     } else {
-      toast.error("Code execution failed!");
-      setIsCorrect(false);
+      toast.error("Some test cases failed!");
     }
   };
 

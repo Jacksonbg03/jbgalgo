@@ -21,5 +21,6 @@ router.get("/problem", getProblems);
 
 // Submit jawaban user
 router.post("/problem/:problemId/submit", submitProblem);
+router.post("/problem/add", addProblem);
 
 export default router;

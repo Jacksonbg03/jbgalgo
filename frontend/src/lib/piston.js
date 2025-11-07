@@ -13,7 +13,7 @@ const LANGUAGE_VERSIONS = {
  * @param {string} code - source code to executed
  * @returns {Promise<{success:boolean, output?:string, error?: string}>}
  */
-export async function executeCode(language, code) {
+export async function executeCode(language, code, stdin = "") {
   try {
     const languageConfig = LANGUAGE_VERSIONS[language];
 
@@ -38,6 +38,7 @@ export async function executeCode(language, code) {
             content: code,
           },
         ],
+        stdin,
       }),
     });
 
@@ -49,7 +50,6 @@ export async function executeCode(language, code) {
     }
 
     const data = await response.json();
-
     const output = data.run.output || "";
     const stderr = data.run.stderr || "";
 

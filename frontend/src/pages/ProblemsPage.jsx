@@ -41,8 +41,6 @@ function ProblemsPage() {
 const filteredProblems = useMemo(() => {
   if (!problems || !Array.isArray(problems)) return [];
 
-  const difficultyOrder = { Easy: 1, Medium: 2, Hard: 3 };
-
   return problems
     .filter((p) => {
       // STATUS
@@ -66,7 +64,6 @@ const filteredProblems = useMemo(() => {
 
       return statusCheck && difficultyCheck && categoryCheck;
     })
-    .sort((a, b) => difficultyOrder[a.difficulty] - difficultyOrder[b.difficulty]);
 }, [problems, filters]);
 
 

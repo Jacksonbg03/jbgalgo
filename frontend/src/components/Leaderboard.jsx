@@ -3,7 +3,6 @@ import { Trophy } from "lucide-react";
 import { Medal } from './Medal';
 
 export const Leaderboard = ({ data }) => {
-  console.log(data)
   return (
     <div className="card bg-base-100 border-2 border-primary/20 hover:border-primary/40 mt-8">
       <div className="card-body">
