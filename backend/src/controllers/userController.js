@@ -2,7 +2,7 @@ import User from "../models/User.js"
 
 export const getLeaderboard = async (req, res) => {
   try {
-    const leaderboard = await User.getLeaderboard(10);
+    const leaderboard = await User.getLeaderboard();
     return res.json({ leaderboard });
   } catch (error) {
     console.error(error);

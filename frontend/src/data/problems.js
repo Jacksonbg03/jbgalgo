@@ -483,80 +483,120 @@ export const PROBLEMS = {
 //   },
 //   hiddenInputs: ["5", "15"],
 // },
-"count-passing-scores": {
-  id: "count-passing-scores",
-  title: "Count Passing Scores",
-  difficulty: "Easy",
-  difficultyLevel: 1,
-  category: ["List", "Loop", "Condition"],
-  description: {
-    text: "Given a list of student scores, return how many students passed (score >= 75).",
-    notes: [
-      "A score is considered passing if it is greater than or equal to 75.",
-      "Use a loop to check each value in the list."
+// "count-passing-scores": {
+//   id: "count-passing-scores",
+//   title: "Count Passing Scores",
+//   difficulty: "Easy",
+//   difficultyLevel: 1,
+//   category: ["List", "Loop", "Condition"],
+//   description: {
+//     text: "Given a list of student scores, return how many students passed (score >= 75).",
+//     notes: [
+//       "A score is considered passing if it is greater than or equal to 75.",
+//       "Use a loop to check each value in the list."
+//     ]
+//   },
+//   examples: [
+//     { input: "scores = [80, 70, 90, 60]", output: "2" },
+//     { input: "scores = [75, 75, 75]", output: "3" },
+//     { input: "scores = [50, 40, 30]", output: "0" }
+//   ],
+//   constraints: [
+//     "1 ≤ scores.length ≤ 100",
+//     "0 ≤ scores[i] ≤ 100"
+//   ],
+//   starterCode: {
+//     javascript: `function countPassingScores(scores) {
+//   // --- YOUR CODE HERE ---
+// }
+
+// // --- INPUT SECTION ---
+// const scores = JSON.parse(readline());
+
+// // --- OUTPUT SECTION ---
+// console.log(countPassingScores(scores));`,
+
+//     python: `def countPassingScores(scores):
+//     # --- YOUR CODE HERE ---
+
+// # --- INPUT SECTION ---
+// scores = eval(input())
+
+// # --- OUTPUT SECTION ---
+// print(countPassingScores(scores))`,
+
+//     java: `import java.util.*;
+
+// public class Main {
+//     public static int countPassingScores(int[] scores) {
+//         // --- YOUR CODE HERE ---
+//     }
+
+//     public static void main(String[] args) {
+//         // --- INPUT SECTION ---
+//         Scanner sc = new Scanner(System.in);
+//         String scoresStr = sc.nextLine();
+//         scoresStr = scoresStr.replaceAll("\\\\[|\\\\]", "");
+//         String[] parts = scoresStr.split(",");
+//         int[] scores = new int[parts.length];
+//         for (int i = 0; i < parts.length; i++) scores[i] = Integer.parseInt(parts[i].trim());
+
+//         // --- OUTPUT SECTION ---
+//         System.out.println(countPassingScores(scores));
+//     }
+// }`
+//   },
+//   expectedOutput: {
+//     javascript: "2\n3\n0",
+//     python: "2\n3\n0",
+//     java: "2\n3\n0"
+//   },
+//   hiddenInputs: [
+//     "[80, 70, 90, 60]",
+//     "[75, 75, 75]",
+//     "[50, 40, 30]"
+//   ]
+// }
+"trapping-rain-water": {
+  "id": "trapping-rain-water",
+  "title": "Trapping Rain Water",
+  "difficulty": "Hard",
+  "difficultyLevel": 3,
+  "category": ["Array", "Two Pointers", "Stack"],
+  "description": {
+    "text": "Given a list of non-negative integers representing an elevation map, compute how much water can be trapped after raining.",
+    "notes": [
+      "Water trapped at each index depends on the shorter of the tallest bar on the left and right.",
+      "Use two pointers for optimal O(n) time complexity.",
+      "Alternatively, you may use a stack-based approach."
     ]
   },
-  examples: [
-    { input: "scores = [80, 70, 90, 60]", output: "2" },
-    { input: "scores = [75, 75, 75]", output: "3" },
-    { input: "scores = [50, 40, 30]", output: "0" }
+  "examples": [
+    { "input": "height = [0,1,0,2,1,0,3,1,0,1,2]", "output": "8" },
+    { "input": "height = [4,2,0,3,2,5]", "output": "9" },
+    { "input": "height = [1,1,1,1]", "output": "0" }
   ],
-  constraints: [
-    "1 ≤ scores.length ≤ 100",
-    "0 ≤ scores[i] ≤ 100"
+  "constraints": [
+    "1 ≤ height.length ≤ 20000",
+    "0 ≤ height[i] ≤ 100000"
   ],
-  starterCode: {
-    javascript: `function countPassingScores(scores) {
-  // --- YOUR CODE HERE ---
-}
-
-// --- INPUT SECTION ---
-const scores = JSON.parse(readline());
-
-// --- OUTPUT SECTION ---
-console.log(countPassingScores(scores));`,
-
-    python: `def countPassingScores(scores):
-    # --- YOUR CODE HERE ---
-
-# --- INPUT SECTION ---
-scores = eval(input())
-
-# --- OUTPUT SECTION ---
-print(countPassingScores(scores))`,
-
-    java: `import java.util.*;
-
-public class Main {
-    public static int countPassingScores(int[] scores) {
-        // --- YOUR CODE HERE ---
-    }
-
-    public static void main(String[] args) {
-        // --- INPUT SECTION ---
-        Scanner sc = new Scanner(System.in);
-        String scoresStr = sc.nextLine();
-        scoresStr = scoresStr.replaceAll("\\\\[|\\\\]", "");
-        String[] parts = scoresStr.split(",");
-        int[] scores = new int[parts.length];
-        for (int i = 0; i < parts.length; i++) scores[i] = Integer.parseInt(parts[i].trim());
-
-        // --- OUTPUT SECTION ---
-        System.out.println(countPassingScores(scores));
-    }
-}`
+  "starterCode": {
+    "javascript": "function trap(height) {\n  // --- YOUR CODE HERE ---\n}\n\n// --- INPUT SECTION ---\nconst height = JSON.parse(readline());\n\n// --- OUTPUT SECTION ---\nconsole.log(trap(height));",
+    "python": "def trap(height):\n    # --- YOUR CODE HERE ---\n\n# --- INPUT SECTION ---\nheight = eval(input())\n\n# --- OUTPUT SECTION ---\nprint(trap(height))",
+    "java": "import java.util.*;\n\npublic class Main {\n    public static int trap(int[] height) {\n        // --- YOUR CODE HERE ---\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String arrStr = sc.nextLine();\n        arrStr = arrStr.replaceAll(\"\\\\[|\\\\]\", \"\");\n        String[] parts = arrStr.split(\",\");\n        int[] height = new int[parts.length];\n        for (int i = 0; i < parts.length; i++) height[i] = Integer.parseInt(parts[i].trim());\n\n        System.out.println(trap(height));\n    }\n}"
   },
-  expectedOutput: {
-    javascript: "2\n3\n0",
-    python: "2\n3\n0",
-    java: "2\n3\n0"
+  "expectedOutput": {
+    "javascript": "8\n9\n0",
+    "python": "8\n9\n0",
+    "java": "8\n9\n0"
   },
-  hiddenInputs: [
-    "[80, 70, 90, 60]",
-    "[75, 75, 75]",
-    "[50, 40, 30]"
+  "hiddenInputs": [
+    "[0,1,0,2,1,0,3,1,0,1,2]",
+    "[4,2,0,3,2,5]",
+    "[1,1,1,1]"
   ]
 }
+
 
 };
 

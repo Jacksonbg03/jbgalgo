@@ -39,3 +39,12 @@ export const useSubmitProblem = () =>{
 
   return result
 }
+
+export const useAddProblem = () =>{
+  const result = useMutation({
+    mutationKey: ["addProblem"],
+    mutationFn: problemsApi.addProblem,
+  })
+
+  return result
+}

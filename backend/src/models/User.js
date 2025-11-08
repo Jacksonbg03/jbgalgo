@@ -54,7 +54,7 @@ const userSchema = new mongoose.Schema(
   { timestamps: true } // createdAt, updatedAt
 );
 
-userSchema.statics.getLeaderboard = async function (limit = 10) {
+userSchema.statics.getLeaderboard = async function (limit = 50) {
   return this.aggregate([
     {
       $lookup: {
