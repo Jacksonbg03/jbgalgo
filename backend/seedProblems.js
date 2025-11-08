@@ -19,6 +19,7 @@ const seed = async () => {
           problemId: p.id,
           title: p.title,
           difficulty: p.difficulty,
+          difficultyLevel: p.difficultyLevel,
           category: p.category,
           description: p.description,
           examples: p.examples,

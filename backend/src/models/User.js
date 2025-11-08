@@ -36,6 +36,18 @@ const userSchema = new mongoose.Schema(
           type: Boolean,
           default: false,
         },
+        sourceCode: {
+          type: String,
+          default: "", // menyimpan kode program
+        },
+        language: {
+          type: String,
+          default: "python", // atau python / java
+        },
+        submittedAt: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },

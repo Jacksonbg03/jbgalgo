@@ -21,7 +21,7 @@ export const submitProblem = async (req, res) => {
     // const problemId = "two-sum"
     // const solved = true
 
-    const { userId, problemId, solved } = req.body;
+    const { userId, problemId, solved, sourceCode, language } = req.body;
 
     const user = await User.findOne({clerkId: userId});
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -34,9 +34,17 @@ export const submitProblem = async (req, res) => {
     );
 
     if (existing) {
-      existing.solved = solved || true;
-    } else {
-      user.solvedProblems.push({ problem: problem._id, solved: solved });
+      existing.sourceCode = sourceCode;
+      existing.language = language;
+      existing.solved = true;
+      existing.submittedAt = new Date()
+    } else { user.solvedProblems.push({
+        problem: problem._id,
+        solved: solved,
+        sourceCode,
+        language,
+        submittedAt: new Date()
+      });
     }
 
     await user.save();

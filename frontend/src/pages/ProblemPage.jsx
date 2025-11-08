@@ -146,6 +146,8 @@ function ProblemPage() {
         userId: user.id,
         problemId: id,
         solved: true,
+        sourceCode: code,
+        language: selectedLanguage
       });
     } else if (allErrors.length > 0) {
       toast.error("Code execution error!");

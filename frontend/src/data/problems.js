@@ -3,6 +3,7 @@ export const PROBLEMS = {
 //     id: "two-sum",
 //     title: "Two Sum",
 //     difficulty: "Easy",
+//     difficutlyLevel: 1,
 //     category: ["Array", "Hash Table"],
 //     description: {
 //       text: "Given an array of integers nums and an integer target, return indices of the two numbers in the array such that they add up to target.",
@@ -337,151 +338,225 @@ export const PROBLEMS = {
 //       "[1,1]"
 //     ],
 //   },
-  "solve-me-first": {
-    id: "solve-me-first",
-    title: "Solve Me First",
-    difficulty: "Easy",
-    category: ["Math", "Introductory"],
-    description: {
-      text: "Complete the function that takes two integers and returns their sum.",
-      notes: ["This is a very basic problem to help you get started with reading input and producing output."],
-    },
-    examples: [
-      { input: "a = 2, b = 3", output: "5" },
-      { input: "a = 10, b = 20", output: "30" },
-    ],
-    constraints: ["0 ≤ a, b ≤ 1000"],
-    starterCode: {
-      javascript: `function solveMeFirst(a, b) {
-    // --- YOUR CODE HERE ---
-    return a + b;
-  }
+  // "solve-me-first": {
+  //   id: "solve-me-first",
+  //   title: "Solve Me First",
+  //   difficulty: "Easy",
+  //   category: ["Math", "Introductory"],
+  //   description: {
+  //     text: "Complete the function that takes two integers and returns their sum.",
+  //     notes: ["This is a very basic problem to help you get started with reading input and producing output."],
+  //   },
+  //   examples: [
+  //     { input: "a = 2, b = 3", output: "5" },
+  //     { input: "a = 10, b = 20", output: "30" },
+  //   ],
+  //   constraints: ["0 ≤ a, b ≤ 1000"],
+  //   starterCode: {
+  //     javascript: `function solveMeFirst(a, b) {
+  //   // --- YOUR CODE HERE ---
+  //   return a + b;
+  // }
 
-  // --- INPUT SECTION ---
-  const a = parseInt(readline());
-  const b = parseInt(readline());
+  // // --- INPUT SECTION ---
+  // const a = parseInt(readline());
+  // const b = parseInt(readline());
 
-  // --- OUTPUT SECTION ---
-  console.log(solveMeFirst(a, b));`,
+  // // --- OUTPUT SECTION ---
+  // console.log(solveMeFirst(a, b));`,
 
-      python: `def solveMeFirst(a, b):
-      # --- YOUR CODE HERE ---
-      return a + b
+  //     python: `def solveMeFirst(a, b):
+  //     # --- YOUR CODE HERE ---
+  //     return a + b
 
-  # --- INPUT SECTION ---
-  a = int(input())
-  b = int(input())
+  // # --- INPUT SECTION ---
+  // a = int(input())
+  // b = int(input())
 
-  # --- OUTPUT SECTION ---
-  print(solveMeFirst(a, b))`,
+  // # --- OUTPUT SECTION ---
+  // print(solveMeFirst(a, b))`,
 
-      java: `import java.util.*;
+  //     java: `import java.util.*;
 
-  public class Main {
-      public static int solveMeFirst(int a, int b) {
-          // --- YOUR CODE HERE ---
-          return a + b;
-      }
+  // public class Main {
+  //     public static int solveMeFirst(int a, int b) {
+  //         // --- YOUR CODE HERE ---
+  //         return a + b;
+  //     }
 
-      public static void main(String[] args) {
-          // --- INPUT SECTION ---
-          Scanner sc = new Scanner(System.in);
-          int a = sc.nextInt();
-          int b = sc.nextInt();
+  //     public static void main(String[] args) {
+  //         // --- INPUT SECTION ---
+  //         Scanner sc = new Scanner(System.in);
+  //         int a = sc.nextInt();
+  //         int b = sc.nextInt();
 
-          // --- OUTPUT SECTION ---
-          System.out.println(solveMeFirst(a, b));
-      }
-  }` },
-    expectedOutput: {
-      javascript: "5\n30",
-      python: "5\n30",
-      java: "5\n30",
-    },
-    hiddenInputs: ["2\n3", "10\n20"],
-  },
-  "fizzbuzz": {
-  id: "fizzbuzz",
-  title: "FizzBuzz",
+  //         // --- OUTPUT SECTION ---
+  //         System.out.println(solveMeFirst(a, b));
+  //     }
+  // }` },
+  //   expectedOutput: {
+  //     javascript: "5\n30",
+  //     python: "5\n30",
+  //     java: "5\n30",
+  //   },
+  //   hiddenInputs: ["2\n3", "10\n20"],
+  // },
+//   "fizzbuzz": {
+//   id: "fizzbuzz",
+//   title: "FizzBuzz",
+//   difficulty: "Easy",
+//   category: ["Math", "Loop", "Condition"],
+//   description: {
+//     text: "Given an integer n, print the numbers from 1 to n. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
+//     notes: ["Each output should be printed on a new line."],
+//   },
+//   examples: [
+//     { input: "n = 5", output: "1\n2\nFizz\n4\nBuzz" },
+//     { input: "n = 15", output: "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz" },
+//   ],
+//   constraints: ["1 ≤ n ≤ 10⁴"],
+//   starterCode: {
+//     javascript: `function fizzBuzz(n) {
+//   // --- YOUR CODE HERE ---
+//   for (let i = 1; i <= n; i++) {
+//     if (i % 15 === 0) console.log("FizzBuzz");
+//     else if (i % 3 === 0) console.log("Fizz");
+//     else if (i % 5 === 0) console.log("Buzz");
+//     else console.log(i);
+//   }
+// }
+
+// // --- INPUT SECTION ---
+// const n = parseInt(readline());
+
+// // --- OUTPUT SECTION ---
+// fizzBuzz(n);`,
+
+//     python: `def fizzBuzz(n):
+//     # --- YOUR CODE HERE ---
+//     for i in range(1, n + 1):
+//         if i % 15 == 0:
+//             print("FizzBuzz")
+//         elif i % 3 == 0:
+//             print("Fizz")
+//         elif i % 5 == 0:
+//             print("Buzz")
+//         else:
+//             print(i)
+
+// # --- INPUT SECTION ---
+// n = int(input())
+
+// # --- OUTPUT SECTION ---
+// fizzBuzz(n)`,
+
+//     java: `import java.util.*;
+
+// public class Main {
+//     public static void fizzBuzz(int n) {
+//         // --- YOUR CODE HERE ---
+//         for (int i = 1; i <= n; i++) {
+//             if (i % 15 == 0)
+//                 System.out.println("FizzBuzz");
+//             else if (i % 3 == 0)
+//                 System.out.println("Fizz");
+//             else if (i % 5 == 0)
+//                 System.out.println("Buzz");
+//             else
+//                 System.out.println(i);
+//         }
+//     }
+
+//     public static void main(String[] args) {
+//         // --- INPUT SECTION ---
+//         Scanner sc = new Scanner(System.in);
+//         int n = sc.nextInt();
+
+//         // --- OUTPUT SECTION ---
+//         fizzBuzz(n);
+//     }
+// }` },
+//   expectedOutput: {
+//     javascript: "1\n2\nFizz\n4\nBuzz\n...\nFizzBuzz",
+//     python: "1\n2\nFizz\n4\nBuzz\n...\nFizzBuzz",
+//     java: "1\n2\nFizz\n4\nBuzz\n...\nFizzBuzz",
+//   },
+//   hiddenInputs: ["5", "15"],
+// },
+"count-passing-scores": {
+  id: "count-passing-scores",
+  title: "Count Passing Scores",
   difficulty: "Easy",
-  category: ["Math", "Loop", "Condition"],
+  difficultyLevel: 1,
+  category: ["List", "Loop", "Condition"],
   description: {
-    text: "Given an integer n, print the numbers from 1 to n. But for multiples of three print 'Fizz' instead of the number and for the multiples of five print 'Buzz'. For numbers which are multiples of both three and five print 'FizzBuzz'.",
-    notes: ["Each output should be printed on a new line."],
+    text: "Given a list of student scores, return how many students passed (score >= 75).",
+    notes: [
+      "A score is considered passing if it is greater than or equal to 75.",
+      "Use a loop to check each value in the list."
+    ]
   },
   examples: [
-    { input: "n = 5", output: "1\n2\nFizz\n4\nBuzz" },
-    { input: "n = 15", output: "1\n2\nFizz\n4\nBuzz\nFizz\n7\n8\nFizz\nBuzz\n11\nFizz\n13\n14\nFizzBuzz" },
+    { input: "scores = [80, 70, 90, 60]", output: "2" },
+    { input: "scores = [75, 75, 75]", output: "3" },
+    { input: "scores = [50, 40, 30]", output: "0" }
   ],
-  constraints: ["1 ≤ n ≤ 10⁴"],
+  constraints: [
+    "1 ≤ scores.length ≤ 100",
+    "0 ≤ scores[i] ≤ 100"
+  ],
   starterCode: {
-    javascript: `function fizzBuzz(n) {
+    javascript: `function countPassingScores(scores) {
   // --- YOUR CODE HERE ---
-  for (let i = 1; i <= n; i++) {
-    if (i % 15 === 0) console.log("FizzBuzz");
-    else if (i % 3 === 0) console.log("Fizz");
-    else if (i % 5 === 0) console.log("Buzz");
-    else console.log(i);
-  }
 }
 
 // --- INPUT SECTION ---
-const n = parseInt(readline());
+const scores = JSON.parse(readline());
 
 // --- OUTPUT SECTION ---
-fizzBuzz(n);`,
+console.log(countPassingScores(scores));`,
 
-    python: `def fizzBuzz(n):
+    python: `def countPassingScores(scores):
     # --- YOUR CODE HERE ---
-    for i in range(1, n + 1):
-        if i % 15 == 0:
-            print("FizzBuzz")
-        elif i % 3 == 0:
-            print("Fizz")
-        elif i % 5 == 0:
-            print("Buzz")
-        else:
-            print(i)
 
 # --- INPUT SECTION ---
-n = int(input())
+scores = eval(input())
 
 # --- OUTPUT SECTION ---
-fizzBuzz(n)`,
+print(countPassingScores(scores))`,
 
     java: `import java.util.*;
 
 public class Main {
-    public static void fizzBuzz(int n) {
+    public static int countPassingScores(int[] scores) {
         // --- YOUR CODE HERE ---
-        for (int i = 1; i <= n; i++) {
-            if (i % 15 == 0)
-                System.out.println("FizzBuzz");
-            else if (i % 3 == 0)
-                System.out.println("Fizz");
-            else if (i % 5 == 0)
-                System.out.println("Buzz");
-            else
-                System.out.println(i);
-        }
     }
 
     public static void main(String[] args) {
         // --- INPUT SECTION ---
         Scanner sc = new Scanner(System.in);
-        int n = sc.nextInt();
+        String scoresStr = sc.nextLine();
+        scoresStr = scoresStr.replaceAll("\\\\[|\\\\]", "");
+        String[] parts = scoresStr.split(",");
+        int[] scores = new int[parts.length];
+        for (int i = 0; i < parts.length; i++) scores[i] = Integer.parseInt(parts[i].trim());
 
         // --- OUTPUT SECTION ---
-        fizzBuzz(n);
+        System.out.println(countPassingScores(scores));
     }
-}` },
-  expectedOutput: {
-    javascript: "1\n2\nFizz\n4\nBuzz\n...\nFizzBuzz",
-    python: "1\n2\nFizz\n4\nBuzz\n...\nFizzBuzz",
-    java: "1\n2\nFizz\n4\nBuzz\n...\nFizzBuzz",
+}`
   },
-  hiddenInputs: ["5", "15"],
-},
+  expectedOutput: {
+    javascript: "2\n3\n0",
+    python: "2\n3\n0",
+    java: "2\n3\n0"
+  },
+  hiddenInputs: [
+    "[80, 70, 90, 60]",
+    "[75, 75, 75]",
+    "[50, 40, 30]"
+  ]
+}
 
 };
 
