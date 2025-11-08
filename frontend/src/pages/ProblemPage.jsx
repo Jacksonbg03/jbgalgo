@@ -46,8 +46,19 @@ function ProblemPage() {
   useEffect(() => {
     if (problem) {
       setCurrentProblemId(problem);
-      setSelectedLanguage("python");
-      setCode(problem.starterCode.python);
+      if (problem?.saveLanguageUser){
+        setSelectedLanguage(problem.saveLanguageUser);
+      }else{
+        setSelectedLanguage("python");
+      }
+
+      if (problem?.saveSourceCode){
+        setCode(problem.saveSourceCode);
+      }
+      else{
+        setCode(problem.starterCode.python);
+      }
+
       setOutputArr([])
       setIsCorrect(null);
       setError(null);
@@ -58,7 +69,11 @@ function ProblemPage() {
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
     setSelectedLanguage(newLang);
-    setCode(currentProblemId.starterCode[newLang]);
+    if (currentProblemId?.saveSourceCode && currentProblemId?.saveLanguageUser === newLang){
+      setCode(currentProblemId.saveSourceCode);
+    }else{
+      setCode(currentProblemId.starterCode[newLang]);
+    }
     setOutputArr([])
     setIsCorrect(null);
     setError(null);

@@ -64,15 +64,17 @@ export const getSolvedProblem = async (req, res) => {
 
     const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});
     const results = problems.map((p) => {
-    const status = user.solvedProblems.find(
-        (up) => up.problem._id.toString() === p._id.toString()
+      const status = user.solvedProblems.find(
+          (up) => up.problem._id.toString() === p._id.toString()
       );
       return {
         ...p._doc,
         solved: status ? status.solved : false,
+        saveLanguageUser: status && status?.language ? status.language : "",
+        saveSourceCode: status && status?.sourceCode ? status.sourceCode : ""
       };
     });
-    
+
     return res.json({ problems: results });
   } catch (err) {
     console.error(err);

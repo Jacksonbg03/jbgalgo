@@ -140,6 +140,9 @@ const filteredProblems = useMemo(() => {
                               <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
                                 {problem.difficulty}
                               </span>
+                              {problem?.solved === true ? (<span className="badge bg-green-500/20 text-green-400 border border-green-500/30">
+                                Solved
+                              </span>): ""}
                             </div>
                             <p className="text-sm text-base-content/60">
                               {problem.category.join(" | ")}

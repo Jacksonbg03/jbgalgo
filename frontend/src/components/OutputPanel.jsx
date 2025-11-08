@@ -1,11 +1,15 @@
 function OutputPanel({ output, error, isCorrect, solved, handleProblemChange, nextProb}) {
+  console.log(output)
+  console.log(error)
+  console.log(isCorrect)
+  console.log(solved)
   return (
     <div className="h-full bg-base-100 flex flex-col">
       <div className="px-4 py-2 bg-base-200 border-b border-base-300 font-semibold text-sm">
         Output
       </div>
       <div className="flex-1 overflow-auto p-4">
-        {output.length === 0 ? (
+        {output.length === 0 && !error ? (
           <p className="text-base-content/50 text-[16px]">Click "Run Code" to see the output here...</p>
         ) : output && isCorrect && solved ? (
           <>
