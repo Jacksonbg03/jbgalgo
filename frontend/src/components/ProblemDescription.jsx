@@ -65,11 +65,23 @@ function ProblemDescription({ problem, currentProblemId, onProblemChange, allPro
                 <div className="bg-base-200 rounded-lg p-4 font-mono text-sm space-y-1.5">
                   <div className="flex gap-2">
                     <span className="text-primary font-bold min-w-[70px]">Input:</span>
-                    <span>{example.input}</span>
+                    <span>{example.input.split('\n').map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        <br />
+                      </span>
+                      ))}
+                    </span>
                   </div>
                   <div className="flex gap-2">
                     <span className="text-secondary font-bold min-w-[70px]">Output:</span>
-                    <span>{example.output}</span>
+                    <span>{example.output.split('\n').map((line, i) => (
+                      <span key={i}>
+                        {line}
+                        <br />
+                      </span>
+                      ))}
+                      </span>
                   </div>
                   {example.explanation && (
                     <div className="pt-2 border-t border-base-300 mt-2">
