@@ -557,43 +557,82 @@ export const PROBLEMS = {
 //     "[50, 40, 30]"
 //   ]
 // }
-"trapping-rain-water": {
-  "id": "trapping-rain-water",
-  "title": "Trapping Rain Water",
-  "difficulty": "Hard",
-  "difficultyLevel": 3,
-  "category": ["Array", "Two Pointers", "Stack"],
+// "trapping-rain-water": {
+//   "id": "trapping-rain-water",
+//   "title": "Trapping Rain Water",
+//   "difficulty": "Hard",
+//   "difficultyLevel": 3,
+//   "category": ["Array", "Two Pointers", "Stack"],
+//   "description": {
+//     "text": "Given a list of non-negative integers representing an elevation map, compute how much water can be trapped after raining.",
+//     "notes": [
+//       "Water trapped at each index depends on the shorter of the tallest bar on the left and right.",
+//       "Use two pointers for optimal O(n) time complexity.",
+//       "Alternatively, you may use a stack-based approach."
+//     ]
+//   },
+//   "examples": [
+//     { "input": "height = [0,1,0,2,1,0,3,1,0,1,2]", "output": "8" },
+//     { "input": "height = [4,2,0,3,2,5]", "output": "9" },
+//     { "input": "height = [1,1,1,1]", "output": "0" }
+//   ],
+//   "constraints": [
+//     "1 ≤ height.length ≤ 20000",
+//     "0 ≤ height[i] ≤ 100000"
+//   ],
+//   "starterCode": {
+//     "javascript": "function trap(height) {\n  // --- YOUR CODE HERE ---\n}\n\n// --- INPUT SECTION ---\nconst height = JSON.parse(readline());\n\n// --- OUTPUT SECTION ---\nconsole.log(trap(height));",
+//     "python": "def trap(height):\n    # --- YOUR CODE HERE ---\n\n# --- INPUT SECTION ---\nheight = eval(input())\n\n# --- OUTPUT SECTION ---\nprint(trap(height))",
+//     "java": "import java.util.*;\n\npublic class Main {\n    public static int trap(int[] height) {\n        // --- YOUR CODE HERE ---\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String arrStr = sc.nextLine();\n        arrStr = arrStr.replaceAll(\"\\\\[|\\\\]\", \"\");\n        String[] parts = arrStr.split(\",\");\n        int[] height = new int[parts.length];\n        for (int i = 0; i < parts.length; i++) height[i] = Integer.parseInt(parts[i].trim());\n\n        System.out.println(trap(height));\n    }\n}"
+//   },
+//   "expectedOutput": {
+//     "javascript": "8\n9\n0",
+//     "python": "8\n9\n0",
+//     "java": "8\n9\n0"
+//   },
+//   "hiddenInputs": [
+//     "[0,1,0,2,1,0,3,1,0,1,2]",
+//     "[4,2,0,3,2,5]",
+//     "[1,1,1,1]"
+//   ]
+// }
+"count-uppercase-letters": {
+  "id": "count-uppercase-letters",
+  "title": "Count Uppercase Letters",
+  "difficulty": "Easy",
+  "difficultyLevel": 1,
+  "category": ["String", "Loop"],
   "description": {
-    "text": "Given a list of non-negative integers representing an elevation map, compute how much water can be trapped after raining.",
+    "text": "Given a string s, return the number of uppercase letters (A–Z) in the string.",
     "notes": [
-      "Water trapped at each index depends on the shorter of the tallest bar on the left and right.",
-      "Use two pointers for optimal O(n) time complexity.",
-      "Alternatively, you may use a stack-based approach."
+      "Only count characters between 'A' and 'Z'.",
+      "Useful for practicing loops and character checks.",
+      "The string may contain digits and symbols."
     ]
   },
   "examples": [
-    { "input": "height = [0,1,0,2,1,0,3,1,0,1,2]", "output": "8" },
-    { "input": "height = [4,2,0,3,2,5]", "output": "9" },
-    { "input": "height = [1,1,1,1]", "output": "0" }
+    { "input": "s = \"Hello World\"", "output": "2" },
+    { "input": "s = \"javascript\"", "output": "0" },
+    { "input": "s = \"aBCDeF!\"", "output": "4" }
   ],
   "constraints": [
-    "1 ≤ height.length ≤ 20000",
-    "0 ≤ height[i] ≤ 100000"
+    "1 ≤ s.length ≤ 1000",
+    "String may contain letters, digits, spaces, and symbols"
   ],
   "starterCode": {
-    "javascript": "function trap(height) {\n  // --- YOUR CODE HERE ---\n}\n\n// --- INPUT SECTION ---\nconst height = JSON.parse(readline());\n\n// --- OUTPUT SECTION ---\nconsole.log(trap(height));",
-    "python": "def trap(height):\n    # --- YOUR CODE HERE ---\n\n# --- INPUT SECTION ---\nheight = eval(input())\n\n# --- OUTPUT SECTION ---\nprint(trap(height))",
-    "java": "import java.util.*;\n\npublic class Main {\n    public static int trap(int[] height) {\n        // --- YOUR CODE HERE ---\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String arrStr = sc.nextLine();\n        arrStr = arrStr.replaceAll(\"\\\\[|\\\\]\", \"\");\n        String[] parts = arrStr.split(\",\");\n        int[] height = new int[parts.length];\n        for (int i = 0; i < parts.length; i++) height[i] = Integer.parseInt(parts[i].trim());\n\n        System.out.println(trap(height));\n    }\n}"
+    "javascript": "function countUppercase(s) {\n  // --- YOUR CODE HERE ---\n}\n\nconst s = readline();\nconsole.log(countUppercase(s));",
+    "python": "def count_uppercase(s):\n    # --- YOUR CODE HERE ---\n\ns = input().strip()\nprint(count_uppercase(s))",
+    "java": "import java.util.*;\n\npublic class Main {\n    public static int countUppercase(String s) {\n        // --- YOUR CODE HERE ---\n    }\n\n    public static void main(String[] args) {\n        Scanner sc = new Scanner(System.in);\n        String s = sc.nextLine();\n        System.out.println(countUppercase(s));\n    }\n}"
   },
   "expectedOutput": {
-    "javascript": "8\n9\n0",
-    "python": "8\n9\n0",
-    "java": "8\n9\n0"
+    "javascript": "2\n0\n4",
+    "python": "2\n0\n4",
+    "java": "2\n0\n4"
   },
   "hiddenInputs": [
-    "[0,1,0,2,1,0,3,1,0,1,2]",
-    "[4,2,0,3,2,5]",
-    "[1,1,1,1]"
+    "\"Hello World\"",
+    "\"javascript\"",
+    "\"aBCDeF!\""
   ]
 }
 

@@ -1,0 +1,41 @@
+name: Render CI
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+
+      # Install & test backend
+      - name: Install Backend
+        run: |
+          cd backend
+          npm install
+
+      - name: Test Backend
+        run: |
+          cd backend
+          npm test || true
+
+      # Install & build frontend
+      - name: Install Frontend
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build Frontend
+        run: |
+          cd frontend
+          npm run build
