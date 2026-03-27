@@ -10,5 +10,9 @@ export const userApi = {
     const response = await axiosInstance.get(`/user/${userId}`);
     return response.data;
   },
+  updateUserLevel: async (data) => {
+    const response = await axiosInstance.post("/user/level", data);
+    return response.data
+  }
 };
 

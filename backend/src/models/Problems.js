@@ -30,6 +30,8 @@ const problemsSchema = new mongoose.Schema(
       python: String,
       java: String,
     },
+    deadline: [Date],
+    level: [String]
   },
   { timestamps: true }
 );

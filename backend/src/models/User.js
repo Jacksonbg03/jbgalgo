@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema(
       enum: ["Admin", "User"],
       default: "User"
     },
+    level: {
+      type: String,
+      enum:["SMP", "SMA"],
+    },
     solvedProblems: [
       {
         problem: {

@@ -1,4 +1,4 @@
-import { useQuery} from "@tanstack/react-query";
+import { useMutation, useQuery} from "@tanstack/react-query";
 import { userApi } from "../api/users";
 
 export const useLeaderboard= () => {
@@ -19,3 +19,11 @@ export const useGetUser = (userId) => {
   return result;
 }
 
+export const useUpdateUserLevel = () =>{
+  const result = useMutation({
+    mutationKey: ["level"],
+    mutationFn: userApi.updateUserLevel,
+  });
+
+  return result
+}

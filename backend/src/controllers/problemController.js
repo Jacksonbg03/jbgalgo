@@ -103,7 +103,6 @@ export const getProblems = async (req, res) =>{
   try {
     const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});;
     if (!problems) return res.status(404).json({error: "Problems not found"})
-    
       return res.json(problems)
   } catch (error) {
     return res.status(500).json({message: "Server error"})

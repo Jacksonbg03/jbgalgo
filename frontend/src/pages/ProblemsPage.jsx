@@ -22,7 +22,7 @@ function ProblemsPage() {
   const problems = solvedProblems
 
   const [filters, setFilters] = useState({
-    status: { solved: false, unsolved: false },
+    status: { solved: false, unsolved: false, priority: false },
     difficulty: { Easy: false, Medium: false, Hard: false },
     category: {
       "String": false,
@@ -50,9 +50,12 @@ const filteredProblems = useMemo(() => {
   return problems
     .filter((p) => {
       // STATUS
-      const { solved, unsolved } = filters.status;
-      let statusCheck = (p.solved && solved) || (!p.solved && unsolved);
-      if (!solved && !unsolved) statusCheck = true;
+      const { solved, unsolved, priority } = filters.status;
+      const deadline = p.deadline?.[0];
+      const isPriority = deadline && p.createdAt && new Date(deadline) > new Date(p.createdAt) && p?.level[0] === userz?.level
+
+      let statusCheck = (p.solved && solved) || (!p.solved && unsolved) || (isPriority && priority);
+      if (!solved && !unsolved && !priority) statusCheck = true;
 
       // DIFFICULTY
       const difficulties = Object.values(filters.difficulty);
@@ -143,6 +146,12 @@ const filteredProblems = useMemo(() => {
                               {problem?.solved === true ? (<span className="badge bg-green-500/20 text-green-400 border border-green-500/30">
                                 Solved
                               </span>): ""}
+                              {problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
+                                (<span className={`badge bg-red-500/20 text-red-400 border-red-400`}>Deadline :&nbsp;
+                                  {problem?.deadline[0].split("T")[0]}
+                                  </span>
+                                ) : ""
+                              }
                             </div>
                             <p className="text-sm text-base-content/60">
                               {problem.category.join(" | ")}
@@ -173,6 +182,7 @@ const filteredProblems = useMemo(() => {
               options={[
                 { label: "Solved", value: "solved", type: "status" },
                 { label: "Unsolved", value: "unsolved", type: "status" },
+                { label: "Priority", value: "priority", type: "status"},
               ]}
               filters={filters}
               onChange={handleCheckboxChange}

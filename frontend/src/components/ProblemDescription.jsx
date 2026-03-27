@@ -4,7 +4,13 @@ function ProblemDescription({ problem, currentProblemId, onProblemChange, allPro
     <div className="h-full overflow-y-auto bg-base-200">
       {/* HEADER SECTION */}
       <div className="p-6 bg-base-100 border-b border-base-300">
-        <div className="flex items-center justify-between mb-3">
+        {problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
+          (<span className={`badge bg-red-500/20 text-red-400 border-red-400`}>Deadline :&nbsp;
+            {problem?.deadline[0].split("T")[0]}
+            </span>
+          ) : ""
+        }
+        <div className="flex items-center justify-between mb-3 mt-1">
           <div className="flex gap-3 items-center">
             <h1 className="text-3xl font-bold text-base-content">{problem.title}</h1>
             { solved === true ?

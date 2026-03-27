@@ -16,10 +16,6 @@ router.get("/problem/:userId/solved", getSolvedProblem);
 router.get("/problem/:problemId", getProblemById);
 router.get("/problem", getProblems);
 
-// Tambah problem baru
-// router.post("/add", addProblem);
-
-// Submit jawaban user
 router.post("/problem/:problemId/submit", submitProblem);
 router.post("/add", addProblem);
 
