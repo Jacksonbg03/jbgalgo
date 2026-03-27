@@ -121,7 +121,7 @@ export async function executeCode(language, code, stdin = "") {
   } catch (error) {
     return { 
       success: false, 
-      error: "Gagal terhubung ke Server Guru. Pastikan satu Wi-Fi!" 
+      error: "Jika menerima error ini, Silahkan kirim jawaban ke WA Sir Jackson dan dijadikan 1 file saja" 
     };
   }
 }
