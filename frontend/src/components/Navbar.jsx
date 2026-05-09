@@ -43,7 +43,7 @@ function Navbar() {
             </div>
           </Link>
 
-          <Link
+          {/* <Link
             to={"/sessions"}
             className={`px-4 py-2.5 rounded-lg transition-all duration-200 
               ${
@@ -58,7 +58,7 @@ function Navbar() {
               <Presentation className="size-4" />
               <span className="font-medium hidden sm:inline">Sessions</span>
             </div>
-          </Link>
+          </Link> */}
 
           <Link
             to={"/dashboard"}

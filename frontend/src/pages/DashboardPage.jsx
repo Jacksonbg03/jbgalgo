@@ -34,10 +34,10 @@ function DashboardPage() {
       
       <div className="max-w-7xl mx-auto px-6 pb-16 flex flex-col gap-2">
         <Leaderboard data={leaderData} />
-        <RecentSessions
+        {/* <RecentSessions
           sessions={recentSessions}
           isLoading={loadingRecentSessions}
-        />
+        /> */}
       </div>
 
       {!loadingUser && (
