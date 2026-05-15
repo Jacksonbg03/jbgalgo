@@ -146,7 +146,7 @@ const filteredProblems = useMemo(() => {
                               {problem?.solved === true ? (<span className="badge bg-green-500/20 text-green-400 border border-green-500/30">
                                 Solved
                               </span>): ""}
-                              {problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
+                              {problem?.level[0] === userz?.level && problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
                                 (<span className={`badge bg-red-500/20 text-red-400 border-red-400`}>Deadline :&nbsp;
                                   {problem?.deadline[0].split("T")[0]}
                                   </span>

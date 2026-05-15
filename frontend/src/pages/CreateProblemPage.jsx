@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { Code2Icon } from 'lucide-react'
 import { useAddProblem } from '../hooks/useProblems'
@@ -7,6 +7,13 @@ import toast from "react-hot-toast";
 
 export const AddProblemPage = () => {
   const AddProblemMutation = useAddProblem();
+  const slugify = (text) => {
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "") // hapus karakter aneh
+      .replace(/\s+/g, "-"); // spasi jadi "-"
+  };
 
   const [form, setForm] = useState({
     problemId: "",
@@ -26,11 +33,26 @@ export const AddProblemPage = () => {
     hiddenInputs: "",
     examples: [
       { input: "", output: "", explanation: "" }
-    ]
+    ],
+    deadline: "",
+    level: "",
   });
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+
+    if (name === "title") {
+      setForm((prev) => ({
+        ...prev,
+        title: value,
+        problemId: slugify(value),
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleExampleChange = (index, field, value) => {
@@ -79,6 +101,8 @@ export const AddProblemPage = () => {
         java: form.expectedOutputJava,
       },
       hiddenInputs: form.hiddenInputs.split("\n"),
+      deadline: form.deadline,
+      level: form.level
     };
 
     AddProblemMutation.mutate(payload, {
@@ -91,6 +115,43 @@ export const AddProblemPage = () => {
       }
     });
   };
+
+  const generateExpectedOutput = (examples) => {
+    return examples
+      .filter(ex => ex.output)
+      .map(ex => ex.output)
+      .join("\n");
+  };
+
+  const generateHiddenInputs = (examples) => {
+    return examples
+      .filter(ex => ex.input)
+      .map(ex => ex.input)
+      .join("\n");
+  };
+
+  const [autoFill, setAutoFill] = useState({
+    expected: true,
+    hidden: true,
+  });
+
+  useEffect(() => {
+    setForm((prev) => ({
+      ...prev,
+      expectedOutputJs: autoFill.expected
+        ? generateExpectedOutput(prev.examples)
+        : prev.expectedOutputJs,
+      expectedOutputPy: autoFill.expected
+        ? generateExpectedOutput(prev.examples)
+        : prev.expectedOutputPy,
+      expectedOutputJava: autoFill.expected
+        ? generateExpectedOutput(prev.examples)
+        : prev.expectedOutputJava,
+      hiddenInputs: autoFill.hidden
+        ? generateHiddenInputs(prev.examples)
+        : prev.hiddenInputs,
+    }));
+  }, [form.examples, autoFill]);
 
   return (
     <div className="min-h-screen bg-base-200">
@@ -126,15 +187,7 @@ export const AddProblemPage = () => {
 
           {/* ID + Title */}
           <div className="flex gap-4">
-            <div className="flex flex-col w-full">
-              <label className="text-sm font-medium mb-1">Problem ID</label>
-              <input 
-                name="problemId"
-                value={form.problemId}
-                onChange={handleChange}
-                className="input bg-base-300 w-full"
-              />
-            </div>
+            
 
             <div className="flex flex-col w-full">
               <label className="text-sm font-medium mb-1">Title</label>
@@ -145,6 +198,18 @@ export const AddProblemPage = () => {
                 className="input bg-base-300 w-full"
               />
             </div>
+
+            {/* <div className="flex flex-col w-full"> */}
+              {/* <label className="text-sm font-medium mb-1">Problem ID</label> */}
+              <input 
+                name="problemId"
+                value={form.problemId}
+                readOnly
+                type="hidden"
+                onChange={handleChange}
+                className="input bg-base-300 w-full"
+              />
+            {/* </div> */}
           </div>
 
           {/* Difficulty */}
@@ -175,6 +240,34 @@ export const AddProblemPage = () => {
                 <option value={2}>2</option>
                 <option value={3}>3</option>
               </select>
+            </div>
+          </div>
+
+          {/* Level */}
+          <div className="flex gap-4">
+            <div className="flex flex-col w-full">
+              <label className="text-sm font-medium mb-1">Level</label>
+              <select 
+                name="level"
+                value={form.level}
+                onChange={handleChange}
+                className="select bg-base-300 w-full"
+              >
+                <option>SMP</option>
+                <option>SMA</option>
+              </select>
+            </div>
+
+            <div className="flex flex-col w-full">
+              <label className="text-sm font-medium mb-1">Deadline</label>
+              <input
+                type="date"
+                name="deadline"
+                value={form.deadline}
+                onChange={handleChange}
+                defaultValue={new Date().toISOString().split("T")[0]}
+                className="input bg-base-300 w-full"
+              />
             </div>
           </div>
 
@@ -215,6 +308,14 @@ Return 0 if there are no negative numbers.
 You only need to count, not sum.
 '
             />
+          </div>
+
+                    {/* Constraints */}
+          <div className="flex flex-col">
+            <label className="text-sm font-medium mb-1">Constraints (one per line)</label>
+            <textarea name="constraints" value={form.constraints} onChange={handleChange} className="textarea bg-base-300 w-full" rows={3} placeholder='1 <= len(nums) <= 100
+-1000 <= nums[i] <= 1000
+' />
           </div>
 
           {/* Examples */}
@@ -261,14 +362,6 @@ You only need to count, not sum.
             <button onClick={addExample} className="btn btn-sm">
               + Add Example
             </button>
-          </div>
-
-          {/* Constraints */}
-          <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1">Constraints (one per line)</label>
-            <textarea name="constraints" value={form.constraints} onChange={handleChange} className="textarea bg-base-300 w-full" rows={3} placeholder='1 <= len(nums) <= 100
--1000 <= nums[i] <= 1000
-' />
           </div>
 
           {/* Starter Code */}

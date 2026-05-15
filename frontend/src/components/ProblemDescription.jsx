@@ -1,10 +1,10 @@
 import { getDifficultyBadgeClass } from "../lib/utils";
-function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved }) {
+function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved, level }) {
   return (
     <div className="h-full overflow-y-auto bg-base-200">
       {/* HEADER SECTION */}
       <div className="p-6 bg-base-100 border-b border-base-300">
-        {problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
+        {problem?.level[0] === level && problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
           (<span className={`badge bg-red-500/20 text-red-400 border-red-400`}>Deadline :&nbsp;
             {problem?.deadline[0].split("T")[0]}
             </span>

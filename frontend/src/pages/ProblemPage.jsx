@@ -13,10 +13,15 @@ import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
 import { useProblemById, useSubmitProblem, useSolvedProblem } from "../hooks/useProblems";
 import { Loader2Icon } from "lucide-react";
+import { useGetUser } from "../hooks/useUsers";
 
 function ProblemPage() {
   const { id } = useParams();
   const { user } = useUser();
+  const { data: userData } = useGetUser(user.id)
+  
+  const userz = userData?.user || []
+  const level = userz?.level || ""
 
   const navigate = useNavigate();
   const [outputArr, setOutputArr] = useState(null);
@@ -199,6 +204,7 @@ function ProblemPage() {
                 onProblemChange={handleProblemChange}
                 allProblems={problemsData}
                 solved={solved}
+                level={level}
               />
             </Panel>
 
@@ -244,6 +250,7 @@ function ProblemPage() {
                 onProblemChange={handleProblemChange}
                 allProblems={problemsData}
                 solved={solved}
+                level={level}
               />
             </Panel>
 
