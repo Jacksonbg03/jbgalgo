@@ -86,42 +86,51 @@
 //   return extensions[language] || "txt";
 // }
 
-// GANTI DENGAN IP LAPTOP GURU!
-const SERVER_IP = "192.168.1.5"; 
+const SERVER_IP = import.meta.env.VITE_PISTON_IP || "192.168.1.5";
 const PISTON_API = `http://${SERVER_IP}:2000/api/v2/piston/execute`;
 
 export async function executeCode(language, code, stdin = "") {
-  // Mapping versi sesuai yang kamu install di Docker tadi
   const versions = {
     javascript: "18.15.0",
     python: "3.10.0",
     java: "15.0.2"
   };
 
+  if (!versions[language]) {
+    return { success: false, error: `Unsupported language: ${language}` };
+  }
+
   try {
     const response = await fetch(PISTON_API, {
       method: "POST",
-      // Karena ini LOCAL, browser biasanya lebih longgar, 
-      // tapi kalau "Failed to fetch" muncul, murid tetap butuh ekstensi Allow CORS
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        language: language,
+        language,
         version: versions[language],
         files: [{ content: code }],
-        stdin: stdin
+        stdin,
       }),
     });
 
+    if (!response.ok) {
+      return { success: false, error: `Server error: ${response.status}` };
+    }
+
     const data = await response.json();
+
+    if (!data.run) {
+      return { success: false, error: "Invalid response from execution server" };
+    }
+
     return {
       success: true,
       output: data.run.output || "No output",
-      error: data.run.stderr
+      error: data.run.stderr || "",
     };
   } catch (error) {
-    return { 
-      success: false, 
-      error: "Jika menerima error ini, Silahkan kirim jawaban ke WA Sir Jackson dan dijadikan 1 file saja" 
+    return {
+      success: false,
+      error: "Jika menerima error ini, Silahkan kirim jawaban ke WA Sir Jackson dan dijadikan 1 file saja"
     };
   }
 }

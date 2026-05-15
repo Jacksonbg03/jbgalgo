@@ -23,9 +23,8 @@ export const getUser = async (req, res)=>{
 
 export const updateUserLevel = async (req, res)=>{
   try {
-    const {userId, level} = req.body
-    const user = await User.findOne({clerkId: userId});
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const { level } = req.body
+    const user = req.user;
 
     user.level = level
     await user.save();

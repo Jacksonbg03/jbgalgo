@@ -3,6 +3,8 @@ import Problems from "../models/Problems.js";
 
 export const addProblem = async (req, res) => {
   try {
+    if (req.user.role !== "Admin") return res.status(403).json({ message: "Forbidden" });
+
     const data = req.body;
     const existing = await Problems.findOne({ problemId: data.problemId });
     if (existing) return res.status(400).json({ message: "Problem already exists" });
@@ -17,14 +19,8 @@ export const addProblem = async (req, res) => {
 
 export const submitProblem = async (req, res) => {
   try {
-    // const userId = "6908a0603f538a19ab1b3859"
-    // const problemId = "two-sum"
-    // const solved = true
-
-    const { userId, problemId, solved, sourceCode, language } = req.body;
-
-    const user = await User.findOne({clerkId: userId});
-    if (!user) return res.status(404).json({ message: "User not found" });
+    const { problemId, solved, sourceCode, language } = req.body;
+    const user = req.user;
 
     const problem = await Problems.findOne({ problemId: problemId });
     if (!problem) return res.status(404).json({ message: "Problem not found" });
@@ -101,9 +97,8 @@ export const getProblemById = async (req, res) => {
 
 export const getProblems = async (req, res) =>{
   try {
-    const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});;
-    if (!problems) return res.status(404).json({error: "Problems not found"})
-      return res.json(problems)
+    const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});
+    return res.json(problems);
   } catch (error) {
     return res.status(500).json({message: "Server error"})
   }

@@ -16,7 +16,7 @@ router.get("/problem/:userId/solved", getSolvedProblem);
 router.get("/problem/:problemId", getProblemById);
 router.get("/problem", getProblems);
 
-router.post("/problem/:problemId/submit", submitProblem);
-router.post("/add", addProblem);
+router.post("/problem/:problemId/submit", protectRoute, submitProblem);
+router.post("/add", protectRoute, addProblem);
 
 export default router;
