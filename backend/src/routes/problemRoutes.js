@@ -1,6 +1,7 @@
 import express from "express";
 import {
   addProblem,
+  updateProblem,
   submitProblem,
   getProblemById,
   getProblems,
@@ -18,5 +19,6 @@ router.get("/problem", getProblems);
 
 router.post("/problem/:problemId/submit", protectRoute, submitProblem);
 router.post("/add", protectRoute, addProblem);
+router.put("/problem/:problemId", protectRoute, updateProblem);
 
 export default router;

@@ -1,12 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { Code2Icon } from 'lucide-react'
-import { useAddProblem } from '../hooks/useProblems'
-import { useNavigate } from 'react-router'
+import { useAddProblem, useProblemById, useUpdateProblem } from '../hooks/useProblems'
+import { useNavigate, useParams } from 'react-router'
 import toast from "react-hot-toast";
 
+// Used for both /problems/add and /problems/edit/:id
 export const AddProblemPage = () => {
+  const { id: editId } = useParams();
+  const isEdit = !!editId;
+  const { data: existingProblem, isLoading: isLoadingProblem } = useProblemById(editId);
+
   const AddProblemMutation = useAddProblem();
+  const UpdateProblemMutation = useUpdateProblem();
+  const activeMutation = isEdit ? UpdateProblemMutation : AddProblemMutation;
   const slugify = (text) => {
     return text
       .toLowerCase()
@@ -45,7 +52,8 @@ export const AddProblemPage = () => {
       setForm((prev) => ({
         ...prev,
         title: value,
-        problemId: slugify(value),
+        // keep the original problemId when editing so links and solved records stay valid
+        problemId: isEdit ? prev.problemId : slugify(value),
       }));
     } else {
       setForm((prev) => ({
@@ -105,6 +113,22 @@ export const AddProblemPage = () => {
       level: form.level
     };
 
+    if (isEdit) {
+      UpdateProblemMutation.mutate(
+        { ...payload, deadline: form.deadline ? [form.deadline] : [], level: form.level ? [form.level] : [] },
+        {
+          onSuccess: () => {
+            toast.success("✅ Problem updated successfully!");
+            navigate("/problems");
+          },
+          onError: () => {
+            toast.error("❌ Failed to update problem");
+          },
+        }
+      );
+      return;
+    }
+
     AddProblemMutation.mutate(payload, {
       onSuccess: () => {
         toast.success("✅ Problem created successfully!");
@@ -115,6 +139,34 @@ export const AddProblemPage = () => {
       }
     });
   };
+
+  // Fill the form with the problem being edited
+  useEffect(() => {
+    if (!isEdit || !existingProblem) return;
+    const p = existingProblem;
+    setForm({
+      problemId: p.problemId,
+      title: p.title || "",
+      difficulty: p.difficulty || "Easy",
+      difficultyLevel: p.difficultyLevel || 1,
+      category: (p.category || []).join(", "),
+      descriptionText: p.description?.text || "",
+      descriptionNotes: (p.description?.notes || []).join("\n"),
+      constraints: (p.constraints || []).join("\n"),
+      javascriptCode: p.starterCode?.javascript || "",
+      pythonCode: p.starterCode?.python || "",
+      javaCode: p.starterCode?.java || "",
+      expectedOutputJs: p.expectedOutput?.javascript || "",
+      expectedOutputPy: p.expectedOutput?.python || "",
+      expectedOutputJava: p.expectedOutput?.java || "",
+      hiddenInputs: (p.hiddenInputs || []).join("\n"),
+      examples: p.examples?.length
+        ? p.examples.map(({ input = "", output = "", explanation = "" }) => ({ input, output, explanation }))
+        : [{ input: "", output: "", explanation: "" }],
+      deadline: p.deadline?.[0] ? String(p.deadline[0]).split("T")[0] : "",
+      level: p.level?.[0] || "",
+    });
+  }, [isEdit, existingProblem]);
 
   const generateExpectedOutput = (examples) => {
     return examples
@@ -130,9 +182,10 @@ export const AddProblemPage = () => {
       .join("\n");
   };
 
+  // Auto-fill would overwrite the saved test cases when editing, so it is off in edit mode
   const [autoFill, setAutoFill] = useState({
-    expected: true,
-    hidden: true,
+    expected: !isEdit,
+    hidden: !isEdit,
   });
 
   useEffect(() => {
@@ -162,7 +215,7 @@ export const AddProblemPage = () => {
             <div className="w-full lg:w-[80%] space-y-4">
                 <div className="flex justify-between">
                     <div className="mb-8 text-center md:text-left w-full">
-                        <h1 className="text-3xl md:text-4xl font-bold mb-2">Create Problem</h1>
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2">{isEdit ? "Edit Problem" : "Create Problem"}</h1>
                         <p className="text-base-content/70 text-sm md:text-base">
                             Sharpen your coding skills with these curated problems
                         </p>
@@ -173,15 +226,21 @@ export const AddProblemPage = () => {
 
         <div className="card bg-base-100 p-6 space-y-6">
 
-          {AddProblemMutation.isSuccess && (
-            <div className="alert alert-success shadow-lg">
-              <span>✅ Problem created successfully!</span>
+          {isEdit && isLoadingProblem && (
+            <div className="alert shadow-lg">
+              <span>Loading problem...</span>
             </div>
           )}
 
-          {AddProblemMutation.isError && (
+          {activeMutation.isSuccess && (
+            <div className="alert alert-success shadow-lg">
+              <span>✅ Problem {isEdit ? "updated" : "created"} successfully!</span>
+            </div>
+          )}
+
+          {activeMutation.isError && (
             <div className="alert alert-error shadow-lg">
-              <span>❌ Failed to create problem.</span>
+              <span>❌ Failed to {isEdit ? "update" : "create"} problem.</span>
             </div>
           )}
 
@@ -253,6 +312,7 @@ export const AddProblemPage = () => {
                 onChange={handleChange}
                 className="select bg-base-300 w-full"
               >
+                <option value="">Select level</option>
                 <option>SMP</option>
                 <option>SMA</option>
               </select>
@@ -444,8 +504,14 @@ public class Main {
 [3, 2, 1]'/>
           </div>
 
-          <button onClick={handleSubmit} className="btn btn-primary w-full" disabled={AddProblemMutation.isPending}>
-            {AddProblemMutation.isPending ? "Creating..." : "Create"}
+          <button
+            onClick={handleSubmit}
+            className="btn btn-primary w-full"
+            disabled={activeMutation.isPending || (isEdit && isLoadingProblem)}
+          >
+            {isEdit
+              ? UpdateProblemMutation.isPending ? "Saving..." : "Save Changes"
+              : AddProblemMutation.isPending ? "Creating..." : "Create"}
           </button>
 
         </div>

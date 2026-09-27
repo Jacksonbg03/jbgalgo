@@ -17,6 +17,44 @@ export const addProblem = async (req, res) => {
   }
 };
 
+const EDITABLE_FIELDS = [
+  "title",
+  "difficulty",
+  "difficultyLevel",
+  "category",
+  "description",
+  "examples",
+  "constraints",
+  "starterCode",
+  "hiddenInputs",
+  "expectedOutput",
+  "deadline",
+  "level",
+];
+
+export const updateProblem = async (req, res) => {
+  try {
+    if (req.user.role !== "Admin") return res.status(403).json({ message: "Forbidden" });
+
+    // problemId stays the same so problem URLs and users' solved records keep working
+    const updates = {};
+    for (const field of EDITABLE_FIELDS) {
+      if (req.body[field] !== undefined) updates[field] = req.body[field];
+    }
+
+    const problem = await Problems.findOneAndUpdate({ problemId: req.params.problemId }, updates, {
+      new: true,
+      runValidators: true,
+    });
+    if (!problem) return res.status(404).json({ message: "Problem not found" });
+
+    return res.json({ message: "Problem updated", problem });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const submitProblem = async (req, res) => {
   try {
     const { problemId, solved, sourceCode, language } = req.body;

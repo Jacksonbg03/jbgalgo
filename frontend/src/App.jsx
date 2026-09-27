@@ -26,6 +26,7 @@ function App() {
         <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to={"/"} />} />
         <Route path="/problem/:id" element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/problems/add" element={isSignedIn && userz.role === "Admin" ? <AddProblemPage /> : <Navigate to={"/"} />} />
+        <Route path="/problems/edit/:id" element={isSignedIn && userz.role === "Admin" ? <AddProblemPage key="edit" /> : <Navigate to={"/"} />} />
       </Routes>
 
       <Toaster toastOptions={{ duration: 3000 }} />

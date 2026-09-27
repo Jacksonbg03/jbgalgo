@@ -2,7 +2,7 @@ import { Link, Navigate } from "react-router";
 import Navbar from "../components/Navbar";
 
 import { useSolvedProblem} from "../hooks/useProblems";
-import { ChevronRightIcon, CirclePlus, Code2Icon, Plus } from "lucide-react";
+import { ChevronRightIcon, CirclePlus, Code2Icon, PencilIcon, Plus } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { useState, useMemo } from "react";
@@ -164,9 +164,26 @@ const filteredProblems = useMemo(() => {
                       </div>
 
                       {/* RIGHT SIDE */}
-                      <div className="flex items-center gap-2 text-primary self-end sm:self-auto">
-                        <span className="font-medium">Solve</span>
-                        <ChevronRightIcon className="size-5" />
+                      <div className="flex items-center gap-4 self-end sm:self-auto">
+                        {userz.role === "Admin" ? (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              // the whole card is a link, so stop it from opening the problem
+                              e.preventDefault();
+                              e.stopPropagation();
+                              navigate(`/problems/edit/${problem.problemId}`);
+                            }}
+                            className="btn btn-sm btn-ghost gap-1"
+                          >
+                            <PencilIcon className="size-4" />
+                            Edit
+                          </button>
+                        ) : ""}
+                        <div className="flex items-center gap-2 text-primary">
+                          <span className="font-medium">Solve</span>
+                          <ChevronRightIcon className="size-5" />
+                        </div>
                       </div>
                     </div>
                   </div>

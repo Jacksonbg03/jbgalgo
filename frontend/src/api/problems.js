@@ -29,4 +29,10 @@ export const problemsApi = {
     return response.data;
   },
 
+  // Edit problem (admin)
+  updateProblem: async ({ problemId, ...data }) => {
+    const response = await axiosInstance.put(`/problems/problem/${problemId}`, data);
+    return response.data;
+  },
+
 };

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 // import toast from "react-hot-toast";
 import { problemsApi } from "../api/problems";
 
@@ -39,6 +39,21 @@ export const useSubmitProblem = () =>{
 
   return result
 }
+
+export const useUpdateProblem = () => {
+  const queryClient = useQueryClient();
+  const result = useMutation({
+    mutationKey: ["updateProblem"],
+    mutationFn: problemsApi.updateProblem,
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["problems"] });
+      queryClient.invalidateQueries({ queryKey: ["problem", variables.problemId] });
+      queryClient.invalidateQueries({ queryKey: ["solvedProblem"] });
+    },
+  });
+
+  return result;
+};
 
 export const useAddProblem = () =>{
   const result = useMutation({
