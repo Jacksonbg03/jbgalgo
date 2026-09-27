@@ -1,9 +1,16 @@
 import axiosInstance from "../lib/axios";
 
 export const problemsApi = {
-  getSolvedProblem: async (userId) => {
-    const response = await axiosInstance.get(`/problems/problem/${userId}/solved`);
+  // problem list with the signed-in user's solved status
+  getSolvedProblem: async () => {
+    const response = await axiosInstance.get("/problems/solved");
     return response.data.problems;
+  },
+
+  // full problem including test cases (admin edit form)
+  getProblemForEdit: async (problemId) => {
+    const response = await axiosInstance.get(`/problems/problem/${problemId}/full`);
+    return response.data;
   },
 
   // Ambil problem berdasarkan problemId
@@ -17,9 +24,9 @@ export const problemsApi = {
     return response.data
   },
 
-  // Submit jawaban user
-  submitProblem: async (data) => {
-    const response = await axiosInstance.post(`/problems/problem/${data.problemId}/submit`, data);
+  // Submit jawaban user: server menjalankan test case dan menentukan benar/salah
+  submitProblem: async ({ problemId, code, language }) => {
+    const response = await axiosInstance.post(`/problems/problem/${problemId}/submit`, { code, language });
     return response.data;
   },
 

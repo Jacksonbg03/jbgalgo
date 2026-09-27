@@ -9,7 +9,8 @@ import { protectRoute } from "../middleware/protectRoute.js";
 const router = express.Router();
 
 router.get("/leaderboard", getLeaderboard);
-router.get("/:userId", getUser);
+// only the signed-in user's own data (email, saved code) is returned
+router.get("/me", protectRoute, getUser);
 router.post("/level", protectRoute, updateUserLevel);
 
 export default router;

@@ -31,10 +31,25 @@ export const useSolvedProblem = (userId) =>{
   return result;
 }
 
+export const useProblemForEdit = (id) => {
+  const result = useQuery({
+    queryKey: ["problemForEdit", id],
+    queryFn: () => problemsApi.getProblemForEdit(id),
+    enabled: !!id,
+  });
+
+  return result;
+};
+
 export const useSubmitProblem = () =>{
+  const queryClient = useQueryClient();
   const result = useMutation({
     mutationKey: ["submitProblem"],
     mutationFn: problemsApi.submitProblem,
+    // not invalidating "solvedProblem" here: ProblemPage resets its output panel when that list changes
+    onSuccess: (data) => {
+      if (data?.passed) queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
   });
 
   return result
@@ -48,6 +63,7 @@ export const useUpdateProblem = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ["problems"] });
       queryClient.invalidateQueries({ queryKey: ["problem", variables.problemId] });
+      queryClient.invalidateQueries({ queryKey: ["problemForEdit", variables.problemId] });
       queryClient.invalidateQueries({ queryKey: ["solvedProblem"] });
     },
   });

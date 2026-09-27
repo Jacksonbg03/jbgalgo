@@ -1,4 +1,4 @@
-import { clerkClient, requireAuth } from "@clerk/express";
+import { clerkClient } from "@clerk/express";
 import User from "../models/User.js";
 
 // New Clerk accounts were meant to be synced to MongoDB by the Inngest webhook, which is disabled.
@@ -26,11 +26,11 @@ async function findOrCreateUser(clerkId) {
   }
 }
 
+// API routes answer 401 JSON instead of Clerk's requireAuth() redirect, which hands the client an HTML page
 export const protectRoute = [
-  requireAuth(),
   async (req, res, next) => {
     try {
-      const clerkId = req.auth().userId;
+      const clerkId = req.auth?.()?.userId;
 
       if (!clerkId) return res.status(401).json({ message: "Unauthorized - invalid token" });
 

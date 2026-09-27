@@ -6,8 +6,9 @@ export const userApi = {
     return response.data;
   },
 
-  getUser: async (userId) => {
-    const response = await axiosInstance.get(`/user/${userId}`);
+  // always the signed-in user (identified by the Clerk session, not the URL)
+  getUser: async () => {
+    const response = await axiosInstance.get("/user/me");
     return response.data;
   },
   updateUserLevel: async (data) => {

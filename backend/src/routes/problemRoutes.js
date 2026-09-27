@@ -4,6 +4,7 @@ import {
   updateProblem,
   submitProblem,
   getProblemById,
+  getProblemForEdit,
   getProblems,
   getSolvedProblem
 } from "../controllers/problemController.js";
@@ -12,8 +13,9 @@ import { protectRoute } from "../middleware/protectRoute.js";
 const router = express.Router();
 
 // GET API
-router.get("/problem/:userId/solved", getSolvedProblem);
+router.get("/solved", protectRoute, getSolvedProblem);
 
+router.get("/problem/:problemId/full", protectRoute, getProblemForEdit);
 router.get("/problem/:problemId", getProblemById);
 router.get("/problem", getProblems);
 

@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Problems from "../models/Problems.js";
+import { runCode } from "../lib/codeRunner.js";
 
 export const addProblem = async (req, res) => {
   try {
@@ -56,35 +57,114 @@ export const updateProblem = async (req, res) => {
   }
 };
 
+// Test cases are the answer key: never send them to students.
+const HIDE_ANSWERS = "-hiddenInputs -expectedOutput";
+
+const LANGUAGES = ["javascript", "python", "java"];
+
+// same normalization the frontend used before grading moved to the server
+const normalizeOutput = (output) =>
+  output
+    .trim()
+    .split("\n")
+    .map((line) =>
+      line
+        .trim()
+        .replace(/\[\s+/g, "[")
+        .replace(/\s+\]/g, "]")
+        .replace(/\s*,\s*/g, ",")
+    )
+    .filter((line) => line.length > 0)
+    .join("\n");
+
+// Per-user submission limits: one run at a time, at most SUBMIT_LIMIT runs per window
+const SUBMIT_LIMIT = 15;
+const SUBMIT_WINDOW_MS = 60 * 1000;
+const running = new Set();
+const recentSubmits = new Map();
+
+function checkSubmitLimit(userId) {
+  if (running.has(userId)) return "Your previous run is still in progress.";
+  const now = Date.now();
+  const recent = (recentSubmits.get(userId) || []).filter((t) => now - t < SUBMIT_WINDOW_MS);
+  if (recent.length >= SUBMIT_LIMIT) return "Too many runs. Please wait a minute and try again.";
+  recent.push(now);
+  recentSubmits.set(userId, recent);
+  return null;
+}
+
+// Runs the code against the hidden test cases on the server and records the result.
 export const submitProblem = async (req, res) => {
+  const user = req.user;
+  const userKey = user._id.toString();
+
+  const { code, language } = req.body || {};
+  if (!LANGUAGES.includes(language) || typeof code !== "string" || !code.trim()) {
+    return res.status(400).json({ message: "Invalid code or language" });
+  }
+
+  const limitMessage = checkSubmitLimit(userKey);
+  if (limitMessage) return res.status(429).json({ message: limitMessage });
+
+  running.add(userKey);
   try {
-    const { problemId, solved, sourceCode, language } = req.body;
-    const user = req.user;
-
-    const problem = await Problems.findOne({ problemId: problemId });
-    if (!problem) return res.status(404).json({ message: "Problem not found" });
-
-    const existing = user.solvedProblems.find(
-      (p) => p.problem.toString() === problem._id.toString()
-    );
-
-    if (existing) {
-      existing.sourceCode = sourceCode;
-      existing.language = language;
-      existing.solved = true;
-      existing.submittedAt = new Date()
-    } else { user.solvedProblems.push({
-        problem: problem._id,
-        solved: solved,
-        sourceCode,
-        language,
-        submittedAt: new Date()
-      });
+    const problem = await Problems.findOne({ problemId: req.params.problemId });
+    if (!problem || (problem.hidden && user.role !== "Admin")) {
+      return res.status(404).json({ message: "Problem not found" });
     }
 
-    await user.save();
-    return res.json({ message: "Problem updated", solvedProblems: user.solvedProblems });
+    const inputs = problem.hiddenInputs || [];
+    const expected = (problem.expectedOutput?.[language] || "").trim().split("\n");
+    if (inputs.length === 0) {
+      return res.json({ passed: false, outputs: [], error: "This problem has no test cases yet." });
+    }
 
+    const results = await Promise.all(inputs.map((input) => runCode(language, code, input.replace(/\\n/g, "\n"))));
+
+    const outputs = [];
+    let error = "";
+    let passed = true;
+    for (let i = 0; i < results.length; i++) {
+      const result = results[i];
+      if (result.error && result.error.trim() !== "") {
+        error = result.error;
+        passed = false;
+        break;
+      }
+      const actual = (result.output || "").trim();
+      outputs.push(actual);
+      if (normalizeOutput(actual) !== normalizeOutput(expected[i] || "")) passed = false;
+    }
+
+    if (passed) {
+      const existing = user.solvedProblems.find((p) => p.problem?.toString() === problem._id.toString());
+      if (existing) {
+        existing.sourceCode = code;
+        existing.language = language;
+        existing.solved = true;
+        existing.submittedAt = new Date();
+      } else {
+        user.solvedProblems.push({ problem: problem._id, solved: true, sourceCode: code, language, submittedAt: new Date() });
+      }
+      await user.save();
+    }
+
+    return res.json({ passed, outputs, error });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  } finally {
+    running.delete(userKey);
+  }
+};
+
+// Full problem including test cases, for the admin edit form
+export const getProblemForEdit = async (req, res) => {
+  try {
+    if (req.user.role !== "Admin") return res.status(403).json({ message: "Forbidden" });
+    const problem = await Problems.findOne({ problemId: req.params.problemId });
+    if (!problem) return res.status(404).json({ message: "Problem not found" });
+    return res.json(problem);
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });
@@ -93,13 +173,11 @@ export const submitProblem = async (req, res) => {
 
 export const getSolvedProblem = async (req, res) => {
   try {
-    const { userId } = req.params;
-    // a brand-new account may not be in MongoDB yet (it is created on its first authenticated request)
-    const user = await User.findOne({clerkId: userId});
-    const solvedProblems = user?.solvedProblems || [];
+    const user = req.user;
+    const solvedProblems = user.solvedProblems || [];
 
-    const visibility = user?.role === "Admin" ? {} : { hidden: { $ne: true } };
-    const problems = await Problems.find(visibility).sort({ difficultyLevel: 1, problemId: 1});
+    const visibility = user.role === "Admin" ? {} : { hidden: { $ne: true } };
+    const problems = await Problems.find(visibility).select(HIDE_ANSWERS).sort({ difficultyLevel: 1, problemId: 1});
     const results = problems.map((p) => {
       const status = solvedProblems.find(
           (up) => up.problem?.toString() === p._id.toString()
@@ -126,9 +204,16 @@ export const getProblemById = async (req, res) => {
       error: `ProblemId is required: ${problemId}`
     });
 
-    const problem = await Problems.findOne({ problemId });
+    const problem = await Problems.findOne({ problemId }).select(HIDE_ANSWERS);
 
     if (!problem) return res.status(404).json({ error: "Problem not found" });
+
+    // hidden problems are only visible to admins (this route is public, so check the optional Clerk session)
+    if (problem.hidden) {
+      const clerkId = req.auth?.()?.userId;
+      const isAdmin = clerkId && (await User.exists({ clerkId, role: "Admin" }));
+      if (!isAdmin) return res.status(404).json({ error: "Problem not found" });
+    }
 
     return res.json(problem);
   } catch (err) {
@@ -138,7 +223,7 @@ export const getProblemById = async (req, res) => {
 
 export const getProblems = async (req, res) =>{
   try {
-    const problems = await Problems.find({ hidden: { $ne: true } }).sort({ difficultyLevel: 1, problemId: 1});
+    const problems = await Problems.find({ hidden: { $ne: true } }).select(HIDE_ANSWERS).sort({ difficultyLevel: 1, problemId: 1});
     return res.json(problems);
   } catch (error) {
     return res.status(500).json({message: "Server error"})

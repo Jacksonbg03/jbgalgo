@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from '../components/Navbar'
 import { Code2Icon } from 'lucide-react'
-import { useAddProblem, useProblemById, useUpdateProblem } from '../hooks/useProblems'
+import { useAddProblem, useProblemForEdit, useUpdateProblem } from '../hooks/useProblems'
 import { useNavigate, useParams } from 'react-router'
 import toast from "react-hot-toast";
 
@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 export const AddProblemPage = () => {
   const { id: editId } = useParams();
   const isEdit = !!editId;
-  const { data: existingProblem, isLoading: isLoadingProblem } = useProblemById(editId);
+  const { data: existingProblem, isLoading: isLoadingProblem } = useProblemForEdit(editId);
 
   const AddProblemMutation = useAddProblem();
   const UpdateProblemMutation = useUpdateProblem();

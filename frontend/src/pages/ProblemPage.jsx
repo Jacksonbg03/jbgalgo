@@ -7,7 +7,6 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import ProblemDescription from "../components/ProblemDescription";
 import OutputPanel from "../components/OutputPanel";
 import CodeEditorPanel from "../components/CodeEditorPanel";
-import { executeCode } from "../lib/piston";
 
 import toast from "react-hot-toast";
 import confetti from "canvas-confetti";
@@ -35,7 +34,7 @@ function ProblemPage() {
   const [solved, setSolved] = useState(false);
 
   const { data: problemsData, isLoadingProblemsData} = useSolvedProblem(user.id);
-  const { data: problemId, isLoadingProblem} = useProblemById(id);
+  const { data: problemId, isLoadingProblem, isError: problemNotFound } = useProblemById(id);
 
   const submitProblemMutation = useSubmitProblem();
   const errorData = problemsData !== undefined && problemId !== undefined
@@ -101,78 +100,39 @@ function ProblemPage() {
     });
   };
 
-  const normalizeOutput = (output) => {
-    // normalize output for comparison (trim whitespace, handle different spacing)
-    return output
-      .trim()
-      .split("\n")
-      .map((line) =>
-        line
-          .trim()
-          // remove spaces after [ and before ]
-          .replace(/\[\s+/g, "[")
-          .replace(/\s+\]/g, "]")
-          // normalize spaces around commas to single space after comma
-          .replace(/\s*,\s*/g, ",")
-      )
-      .filter((line) => line.length > 0)
-      .join("\n");
-  };
-
+  // The server runs the hidden test cases and decides pass/fail, so students can't fake a solve.
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutputArr([])
     setIsCorrect(null);
     setError(null);
 
-    const hiddenInputs = currentProblemId.hiddenInputs;
-    const expectedOutput = currentProblemId.expectedOutput[selectedLanguage].trim().split("\n")
-    let allOutputs = [];
-    let allErrors = []
-    let allPassed = true;
-
-    for (let i = 0; i < hiddenInputs.length; i++) {
-      const inputData = hiddenInputs[i].replace(/\\n/g, "\n");
-      const result = await executeCode(selectedLanguage, code, inputData);
-
-      if (result.error && result.error.trim() !== "") {
-        allErrors.push(result.error);
-        allPassed = false;
-        break;
-      }
-
-      const actualOutput = result.output.trim();
-      allOutputs.push(actualOutput);
-
-      const normalizedActual = normalizeOutput(actualOutput);
-      const normalizedExpected = normalizeOutput(expectedOutput[i]);
-
-      if (normalizedActual !== normalizedExpected) {
-        allPassed = false;
-      }
-    }
-
-    setOutputArr(allOutputs);
-    setError(allErrors.join("\n"));
-    setIsRunning(false);
-    setIsCorrect(allPassed);
-
-
-    if (allPassed) {
-      triggerConfetti();
-      toast.success("All test cases passed!");
-      setSolved(true);
-      submitProblemMutation.mutate({
-        userId: user.id,
+    try {
+      const result = await submitProblemMutation.mutateAsync({
         problemId: id,
-        solved: true,
-        sourceCode: code,
-        language: selectedLanguage
+        code,
+        language: selectedLanguage,
       });
-    } else if (allErrors.length > 0) {
-      toast.error("Code execution error!");
-    } else {
-      toast.error("Some test cases failed!");
+
+      setOutputArr(result.outputs || []);
+      setError(result.error || "");
+      setIsCorrect(result.passed);
+
+      if (result.passed) {
+        triggerConfetti();
+        toast.success("All test cases passed!");
+        setSolved(true);
+      } else if (result.error) {
+        toast.error("Code execution error!");
+      } else {
+        toast.error("Some test cases failed!");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Failed to run code. Please try again.");
+      setIsCorrect(false);
+      toast.error("Failed to run code");
+    } finally {
+      setIsRunning(false);
     }
   };
 
@@ -184,7 +144,7 @@ function ProblemPage() {
     );
 
   // problem exists but is not in this user's list (e.g. hidden by admin)
-  if (errorData && index === -1)
+  if ((errorData && index === -1) || problemNotFound)
     return (
       <div className="h-screen flex flex-col">
         <Navbar />

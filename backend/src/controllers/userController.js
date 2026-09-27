@@ -12,9 +12,7 @@ export const getLeaderboard = async (req, res) => {
 
 export const getUser = async (req, res)=>{
   try {
-    const {userId} = req.params
-    const user = await User.findOne({clerkId: userId});
-    return res.json({user})
+    return res.json({ user: req.user })
   } catch (error) {
     console.error(error)
     return res.status(500).json({message: "Get User error"})
