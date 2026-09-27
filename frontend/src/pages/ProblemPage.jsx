@@ -183,6 +183,18 @@ function ProblemPage() {
       </div>
     );
 
+  // problem exists but is not in this user's list (e.g. hidden by admin)
+  if (errorData && index === -1)
+    return (
+      <div className="h-screen flex flex-col">
+        <Navbar />
+        <div className="flex-1 flex flex-col justify-center items-center gap-4 text-center px-4">
+          <p className="text-2xl font-bold">This problem is not available</p>
+          <button onClick={() => navigate("/problems")} className="btn btn-primary">Back to Problems</button>
+        </div>
+      </div>
+    );
+
   if (!currentProblemId)
     return (
       <div className="flex justify-center items-center h-screen text-[60px] gap-2"><Loader2Icon className="size-16 animate-spin" />Loading...</div>

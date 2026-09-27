@@ -31,7 +31,9 @@ const problemsSchema = new mongoose.Schema(
       java: String,
     },
     deadline: [Date],
-    level: [String]
+    level: [String],
+    // hidden problems are only listed for admins
+    hidden: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

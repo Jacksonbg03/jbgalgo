@@ -43,6 +43,7 @@ export const AddProblemPage = () => {
     ],
     deadline: "",
     level: "",
+    hidden: false,
   });
 
   const handleChange = (e) => {
@@ -110,7 +111,8 @@ export const AddProblemPage = () => {
       },
       hiddenInputs: form.hiddenInputs.split("\n"),
       deadline: form.deadline,
-      level: form.level
+      level: form.level,
+      hidden: form.hidden,
     };
 
     if (isEdit) {
@@ -165,6 +167,7 @@ export const AddProblemPage = () => {
         : [{ input: "", output: "", explanation: "" }],
       deadline: p.deadline?.[0] ? String(p.deadline[0]).split("T")[0] : "",
       level: p.level?.[0] || "",
+      hidden: !!p.hidden,
     });
   }, [isEdit, existingProblem]);
 
@@ -330,6 +333,17 @@ export const AddProblemPage = () => {
               />
             </div>
           </div>
+
+          {/* Visibility */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              className="checkbox checkbox-primary"
+              checked={form.hidden}
+              onChange={(e) => setForm((prev) => ({ ...prev, hidden: e.target.checked }))}
+            />
+            <span className="text-sm font-medium">Hidden (students can't see this problem)</span>
+          </label>
 
           {/* Category */}
           <div className="flex flex-col">

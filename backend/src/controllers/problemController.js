@@ -30,6 +30,7 @@ const EDITABLE_FIELDS = [
   "expectedOutput",
   "deadline",
   "level",
+  "hidden",
 ];
 
 export const updateProblem = async (req, res) => {
@@ -96,7 +97,8 @@ export const getSolvedProblem = async (req, res) => {
     const user = await User.findOne({clerkId: userId}).populate("solvedProblems.problem");
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});
+    const visibility = user.role === "Admin" ? {} : { hidden: { $ne: true } };
+    const problems = await Problems.find(visibility).sort({ difficultyLevel: 1, problemId: 1});
     const results = problems.map((p) => {
       const status = user.solvedProblems.find(
           (up) => up.problem._id.toString() === p._id.toString()
@@ -135,7 +137,7 @@ export const getProblemById = async (req, res) => {
 
 export const getProblems = async (req, res) =>{
   try {
-    const problems = await Problems.find().sort({ difficultyLevel: 1, problemId: 1});
+    const problems = await Problems.find({ hidden: { $ne: true } }).sort({ difficultyLevel: 1, problemId: 1});
     return res.json(problems);
   } catch (error) {
     return res.status(500).json({message: "Server error"})
