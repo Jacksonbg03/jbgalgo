@@ -11,6 +11,7 @@ import { inngest, functions } from "./lib/inngest.js";
 import chatRoutes from "./routes/chatRoutes.js";
 import problemRoutes from "./routes/problemRoutes.js"
 import userRoutes from "./routes/userRoutes.js"
+import executeRoutes from "./routes/executeRoutes.js";
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use(clerkMiddleware()); // this adds auth field to request object: req.auth(
 app.use("/api/chat", chatRoutes);
 app.use("/api/problems", problemRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/execute", executeRoutes);
 
 app.get("/health", (req, res) => {
   res.status(200).json({ msg: "api is up and running" });
