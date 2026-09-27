@@ -27,14 +27,14 @@ const PROBLEMS = [
       text: "Program pertama setiap programmer! Buatlah program yang menampilkan tulisan Hello World ke layar.",
       notes: ["Perhatikan huruf besar dan kecil: H dan W menggunakan huruf besar."],
     },
-    examples: [{ input: "(tidak ada input)", output: "Hello World", explanation: "Gunakan print untuk menampilkan tulisan." }],
+    examples: [{ input: "-", output: "Hello World", explanation: "Gunakan print untuk menampilkan tulisan." }],
     constraints: ["Program tidak menerima input apa pun."],
     starterCode: {
       python: "# Tampilkan tulisan Hello World\n",
       javascript: "// Tampilkan tulisan Hello World\n",
       java: javaMain("        // Tampilkan tulisan Hello World\n        ", false),
     },
-    hiddenInputs: [""],
+    hiddenInputs: ["-"],
     expectedOutput: same("Hello World"),
   },
   {
@@ -44,8 +44,8 @@ const PROBLEMS = [
     difficultyLevel: 1,
     category: ["Input", "Variabel"],
     description: {
-      text: "Komputer akan menyapa kamu! Program menerima sebuah nama, lalu menampilkan sapaan:\nHalo, [nama]! Selamat datang di kelas coding.",
-      notes: [INPUT_NOTE, "Input -> Proses -> Output: nama disimpan di variabel, lalu ditampilkan kembali."],
+      text: "Komputer akan menyapa kamu! Program menerima sebuah nama, lalu menampilkan sapaan untuk nama tersebut.",
+      notes: ["Format output: Halo, [nama]! Selamat datang di kelas coding.", INPUT_NOTE,"Input -> Proses -> Output: nama disimpan di variabel, lalu ditampilkan kembali."],
     },
     examples: [
       { input: "Budi", output: "Halo, Budi! Selamat datang di kelas coding.", explanation: "" },
@@ -75,12 +75,12 @@ const PROBLEMS = [
     difficultyLevel: 1,
     category: ["Input", "Variabel"],
     description: {
-      text: "Buatlah program untuk menyapa temanmu! Program menerima dua baris input: nama kamu, lalu nama temanmu. Tampilkan:\nHalo [nama kamu] dan [nama temanmu], selamat datang di dunia coding!",
-      notes: [INPUT_NOTE],
+      text: "Buatlah program untuk menyapa temanmu! Program menerima dua baris input: nama kamu, lalu nama temanmu.",
+      notes: ["Format output: Halo [nama kamu] dan [nama temanmu], selamat datang di dunia coding!", INPUT_NOTE],
     },
     examples: [
       {
-        input: "Andi\nBudi",
+        input: "Andi\\nBudi",
         output: "Halo Andi dan Budi, selamat datang di dunia coding!",
         explanation: "Baris pertama nama kamu, baris kedua nama temanmu.",
       },
@@ -111,12 +111,16 @@ const PROBLEMS = [
     difficultyLevel: 1,
     category: ["Input", "Aritmatika"],
     description: {
-      text: "Buatlah program untuk menjumlahkan dua angka! Program menerima dua baris input berupa bilangan bulat. Tampilkan:\nPenjumlahan [angka pertama] dan [angka kedua] adalah [hasil]",
-      notes: [INPUT_NOTE, "Input selalu dibaca sebagai teks, ubah dulu menjadi angka sebelum dijumlahkan."],
+      text: "Buatlah program untuk menjumlahkan dua angka! Program menerima dua baris input berupa bilangan bulat.",
+      notes: [
+        "Format output: Penjumlahan [angka pertama] dan [angka kedua] adalah [hasil]",
+        INPUT_NOTE,
+        "Input selalu dibaca sebagai teks, ubah dulu menjadi angka sebelum dijumlahkan.",
+      ],
     },
     examples: [
-      { input: "5\n7", output: "Penjumlahan 5 dan 7 adalah 12", explanation: "5 + 7 = 12" },
-      { input: "10\n-3", output: "Penjumlahan 10 dan -3 adalah 7", explanation: "10 + (-3) = 7" },
+      { input: "5\\n7", output: "Penjumlahan 5 dan 7 adalah 12", explanation: "5 + 7 = 12" },
+      { input: "10\\n-3", output: "Penjumlahan 10 dan -3 adalah 7", explanation: "10 + (-3) = 7" },
     ],
     constraints: ["-1000000 <= angka <= 1000000", "Kedua angka adalah bilangan bulat."],
     starterCode: {
@@ -145,16 +149,17 @@ const PROBLEMS = [
     difficultyLevel: 2,
     category: ["Aritmatika"],
     description: {
-      text: "Saatnya membuat kalkulator! Program menerima dua bilangan bulat positif a dan b (masing-masing satu baris). Tampilkan hasil kelima operasi aritmatika dalam satu baris dengan format:\nTambah: [a+b], Kurang: [a-b], Kali: [a*b], Bagi: [a/b], Sisa: [a%b]",
+      text: "Saatnya membuat kalkulator! Program menerima dua bilangan bulat positif a dan b (masing-masing satu baris). Tampilkan hasil kelima operasi aritmatika dalam satu baris.",
       notes: [
+        "Format output: Tambah: [a+b], Kurang: [a-b], Kali: [a*b], Bagi: [a/b], Sisa: [a%b]",
         INPUT_NOTE,
         "Bagi adalah pembagian bulat (tanpa koma). Python: a // b, JavaScript: Math.floor(a / b), Java: a / b.",
         "Sisa adalah sisa pembagian (modulo) menggunakan simbol %.",
       ],
     },
     examples: [
-      { input: "10\n3", output: "Tambah: 13, Kurang: 7, Kali: 30, Bagi: 3, Sisa: 1", explanation: "10 dibagi 3 = 3 sisa 1" },
-      { input: "4\n9", output: "Tambah: 13, Kurang: -5, Kali: 36, Bagi: 0, Sisa: 4", explanation: "4 dibagi 9 = 0 sisa 4" },
+      { input: "10\\n3", output: "Tambah: 13, Kurang: 7, Kali: 30, Bagi: 3, Sisa: 1", explanation: "10 dibagi 3 = 3 sisa 1" },
+      { input: "4\\n9", output: "Tambah: 13, Kurang: -5, Kali: 36, Bagi: 0, Sisa: 4", explanation: "4 dibagi 9 = 0 sisa 4" },
     ],
     constraints: ["1 <= a, b <= 10000"],
     starterCode: {
