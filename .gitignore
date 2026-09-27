@@ -1,6 +1,4 @@
 node_modules
 .env
 backups
-# problem sets contain hidden test cases, repo is public
-backend/scripts/data
 .DS_Store
