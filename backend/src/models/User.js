@@ -75,27 +75,40 @@ userSchema.statics.getLeaderboard = async function (limit = 50) {
             input: { $ifNull: ["$solvedProblems", []] }, // aman kalau kosong
             as: "sp",
             in: {
-              solved: "$$sp.solved",
-              difficulty: {
-                $let: {
-                  vars: {
-                    prob: {
-                      $arrayElemAt: [
-                        {
-                          $filter: {
-                            input: "$problemsData",
-                            as: "pd",
-                            cond: { $eq: ["$$pd._id", "$$sp.problem"] },
-                          },
+              $let: {
+                vars: {
+                  prob: {
+                    $arrayElemAt: [
+                      {
+                        $filter: {
+                          input: "$problemsData",
+                          as: "pd",
+                          cond: { $eq: ["$$pd._id", "$$sp.problem"] },
                         },
-                        0,
-                      ],
-                    },
+                      },
+                      0,
+                    ],
                   },
-                  in: { $ifNull: ["$$prob.difficulty", "Unknown"] }, // default kalau null
+                },
+                in: {
+                  solved: "$$sp.solved",
+                  difficulty: { $ifNull: ["$$prob.difficulty", "Unknown"] }, // default kalau null
+                  hidden: { $ifNull: ["$$prob.hidden", false] },
                 },
               },
             },
+          },
+        },
+      },
+    },
+    // solves on hidden problems are kept but don't count toward the leaderboard
+    {
+      $addFields: {
+        solvedWithDifficulty: {
+          $filter: {
+            input: "$solvedWithDifficulty",
+            as: "s",
+            cond: { $ne: ["$$s.hidden", true] },
           },
         },
       },
