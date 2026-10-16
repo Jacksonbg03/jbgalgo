@@ -2,6 +2,28 @@ import User from "../models/User.js";
 import Problems from "../models/Problems.js";
 import { runCode } from "../lib/codeRunner.js";
 
+// Students only see problems for their own level (SMP/SMA); problems without a level are for everyone.
+// level is stored as [] / [""] / ["SMP"], or as a plain string on some older problems.
+const problemLevels = (problem) => [].concat(problem.level || []).filter(Boolean);
+
+const canStudentSee = (problem, user) => {
+  if (user.role === "Admin") return true;
+  if (problem.hidden) return false;
+  const levels = problemLevels(problem);
+  return levels.length === 0 || levels.includes(user.level);
+};
+
+const studentProblemFilter = (user) => ({
+  hidden: { $ne: true },
+  $or: [
+    { level: { $exists: false } },
+    { level: null },
+    { level: { $size: 0 } },
+    { level: "" },
+    ...(user.level ? [{ level: user.level }] : []),
+  ],
+});
+
 export const addProblem = async (req, res) => {
   try {
     if (req.user.role !== "Admin") return res.status(403).json({ message: "Forbidden" });
@@ -109,7 +131,7 @@ export const submitProblem = async (req, res) => {
   running.add(userKey);
   try {
     const problem = await Problems.findOne({ problemId: req.params.problemId });
-    if (!problem || (problem.hidden && user.role !== "Admin")) {
+    if (!problem || !canStudentSee(problem, user)) {
       return res.status(404).json({ message: "Problem not found" });
     }
 
@@ -176,7 +198,7 @@ export const getSolvedProblem = async (req, res) => {
     const user = req.user;
     const solvedProblems = user.solvedProblems || [];
 
-    const visibility = user.role === "Admin" ? {} : { hidden: { $ne: true } };
+    const visibility = user.role === "Admin" ? {} : studentProblemFilter(user);
     const problems = await Problems.find(visibility).select(HIDE_ANSWERS).sort({ difficultyLevel: 1, problemId: 1});
     const results = problems.map((p) => {
       const status = solvedProblems.find(
