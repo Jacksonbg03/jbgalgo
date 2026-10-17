@@ -4,6 +4,8 @@ import Navbar from "../components/Navbar";
 import { useSolvedProblem} from "../hooks/useProblems";
 import { ChevronRightIcon, CirclePlus, Code2Icon, PencilIcon, Plus, SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
+import { getDeadlineInfo, problemLevels } from "../lib/problemUtils";
+import DeadlineBadge from "../components/DeadlineBadge";
 import { useUser } from "@clerk/clerk-react";
 import { useState, useMemo } from "react";
 import { FilterSection } from "../components/FilterSection";
@@ -38,7 +40,7 @@ function ProblemsPage() {
   const { data:solvedProblems } = useSolvedProblem(user.id);
   const { data: userData } = useGetUser(user.id);
 
-  const userz = userData?.user || []
+  const userz = useMemo(() => userData?.user || {}, [userData]);
 
   const navigate = useNavigate();
   const problems = solvedProblems
@@ -46,6 +48,7 @@ function ProblemsPage() {
   const [filters, setFilters] = useState({
     status: { new: false, solved: false, unsolved: false, priority: false },
     difficulty: { Easy: false, Medium: false, Hard: false },
+    level: { SMP: false, SMA: false, none: false },
     category: {},
   });
   const [search, setSearch] = useState("");
@@ -82,8 +85,17 @@ const filteredProblems = useMemo(() => {
 
       // STATUS
       const { solved, unsolved, priority } = filters.status;
-      const deadline = p.deadline?.[0];
-      const isPriority = deadline && p.createdAt && new Date(deadline) > new Date(p.createdAt) && p?.level[0] === userz?.level
+      // priority = has a deadline for this user that hasn't passed and isn't solved yet
+      const deadlineInfo = getDeadlineInfo(p, userz);
+      const isPriority = !!deadlineInfo && !deadlineInfo.overdue && !p.solved;
+
+      // LEVEL (admin only)
+      const { SMP, SMA, none } = filters.level;
+      if (SMP || SMA || none) {
+        const levels = problemLevels(p);
+        const levelCheck = (SMP && levels.includes("SMP")) || (SMA && levels.includes("SMA")) || (none && levels.length === 0);
+        if (!levelCheck) return false;
+      }
 
       let statusCheck = (p.solved && solved) || (!p.solved && unsolved) || (isPriority && priority) || (isNewProblem(p) && filters.status.new);
       if (!solved && !unsolved && !priority && !filters.status.new) statusCheck = true;
@@ -105,7 +117,7 @@ const filteredProblems = useMemo(() => {
       return statusCheck && difficultyCheck && categoryCheck;
     })
     .sort(SORTS[sortBy].compare)
-}, [problems, filters, search, sortBy, userz?.level]);
+}, [problems, filters, search, sortBy, userz]);
 
 
   if (!problems) return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -213,12 +225,10 @@ const filteredProblems = useMemo(() => {
                               {problem?.solved === true ? (<span className="badge bg-green-500/20 text-green-400 border border-green-500/30">
                                 Solved
                               </span>): ""}
-                              {problem?.level[0] === userz?.level && problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
-                                (<span className={`badge bg-red-500/20 text-red-400 border-red-400`}>Deadline :&nbsp;
-                                  {problem?.deadline[0].split("T")[0]}
-                                  </span>
-                                ) : ""
-                              }
+                              <DeadlineBadge problem={problem} user={userz} />
+                              {userz.role === "Admin" && problemLevels(problem).map((lvl) => (
+                                <span key={lvl} className="badge badge-outline">{lvl}</span>
+                              ))}
                             </div>
                             <p className="text-sm text-base-content/60">
                               {problem.category.join(" | ")}
@@ -260,7 +270,8 @@ const filteredProblems = useMemo(() => {
           </div>
 
           {/* FILTER SIDEBAR */}
-          <div className={`${showFilters ? "block" : "hidden"} lg:block order-first lg:order-none w-full lg:w-[20%] lg:sticky top-20 bg-base-300/10 p-4 rounded-xl shadow-sm`}>
+          {/* scrolls on its own so long category lists stay reachable */}
+          <div className={`${showFilters ? "block" : "hidden"} lg:block order-first lg:order-none w-full lg:w-[20%] lg:sticky top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto overscroll-contain bg-base-300/10 p-4 rounded-xl shadow-sm`}>
             <FilterSection
               title="STATUS"
               options={[
@@ -283,6 +294,19 @@ const filteredProblems = useMemo(() => {
               filters={filters}
               onChange={handleCheckboxChange}
             />
+
+            {userz.role === "Admin" && (
+              <FilterSection
+                title="LEVEL"
+                options={[
+                  { label: "SMP", value: "SMP", type: "level" },
+                  { label: "SMA", value: "SMA", type: "level" },
+                  { label: "All levels (no level set)", value: "none", type: "level" },
+                ]}
+                filters={filters}
+                onChange={handleCheckboxChange}
+              />
+            )}
 
             <FilterSection
               title="CATEGORY"

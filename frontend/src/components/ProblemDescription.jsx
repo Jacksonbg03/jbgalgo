@@ -1,15 +1,11 @@
 import { getDifficultyBadgeClass } from "../lib/utils";
-function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved, level }) {
+import DeadlineBadge from "./DeadlineBadge";
+function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved, user }) {
   return (
     <div className="h-full overflow-y-auto bg-base-200">
       {/* HEADER SECTION */}
       <div className="p-6 bg-base-100 border-b border-base-300">
-        {problem?.level[0] === level && problem?.deadline !== problem.createdAt.split("T")[0] && problem?.deadline.length !== 0 ?
-          (<span className={`badge bg-red-500/20 text-red-400 border-red-400`}>Deadline :&nbsp;
-            {problem?.deadline[0].split("T")[0]}
-            </span>
-          ) : ""
-        }
+        <DeadlineBadge problem={problem} user={user} />
         <div className="flex items-center justify-between mb-3 mt-1">
           <div className="flex gap-3 items-center">
             <h1 className="text-3xl font-bold text-base-content">{problem.title}</h1>

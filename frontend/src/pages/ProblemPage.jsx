@@ -20,7 +20,6 @@ function ProblemPage() {
   const { data: userData } = useGetUser(user.id)
   
   const userz = userData?.user || []
-  const level = userz?.level || ""
 
   const navigate = useNavigate();
   const [outputArr, setOutputArr] = useState(null);
@@ -176,7 +175,7 @@ function ProblemPage() {
                 onProblemChange={handleProblemChange}
                 allProblems={problemsData}
                 solved={solved}
-                level={level}
+                user={userz}
               />
             </Panel>
 
@@ -222,7 +221,7 @@ function ProblemPage() {
                 onProblemChange={handleProblemChange}
                 allProblems={problemsData}
                 solved={solved}
-                level={level}
+                user={userz}
               />
             </Panel>
 
