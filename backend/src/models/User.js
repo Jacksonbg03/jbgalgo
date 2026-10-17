@@ -29,6 +29,11 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum:["SMP", "SMA"],
     },
+    // hidden (inactive) users are left out of the leaderboard
+    hidden: {
+      type: Boolean,
+      default: false,
+    },
     solvedProblems: [
       {
         problem: {
@@ -60,6 +65,7 @@ const userSchema = new mongoose.Schema(
 
 userSchema.statics.getLeaderboard = async function (limit = 50) {
   return this.aggregate([
+    { $match: { hidden: { $ne: true } } },
     {
       $lookup: {
         from: "problems",

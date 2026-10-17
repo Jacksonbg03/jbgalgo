@@ -1,4 +1,4 @@
-import { useMutation, useQuery} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userApi } from "../api/users";
 
 export const useLeaderboard= () => {
@@ -18,6 +18,29 @@ export const useGetUser = (userId) => {
 
   return result;
 }
+
+export const useAdminUsers = () => {
+  return useQuery({
+    queryKey: ["adminUsers"],
+    queryFn: userApi.listUsers,
+  });
+};
+
+const useAdminUserMutation = (key, mutationFn) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationKey: [key],
+    mutationFn,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["adminUsers"] });
+      queryClient.invalidateQueries({ queryKey: ["leaderboard"] });
+    },
+  });
+};
+
+export const useUpdateUserByAdmin = () => useAdminUserMutation("updateUserByAdmin", userApi.updateUserByAdmin);
+
+export const useDeleteUserByAdmin = () => useAdminUserMutation("deleteUserByAdmin", userApi.deleteUserByAdmin);
 
 export const useUpdateUserLevel = () =>{
   const result = useMutation({
