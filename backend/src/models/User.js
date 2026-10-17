@@ -57,6 +57,11 @@ const userSchema = new mongoose.Schema(
           type: Date,
           default: Date.now,
         },
+        // number of runs on this problem (passing and failing)
+        attempts: {
+          type: Number,
+          default: 0,
+        },
       },
     ],
   },

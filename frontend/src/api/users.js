@@ -25,6 +25,10 @@ export const userApi = {
     const response = await axiosInstance.patch(`/user/admin/users/${id}`, data);
     return response.data;
   },
+  getUserSubmissions: async (id) => {
+    const response = await axiosInstance.get(`/user/admin/users/${id}/submissions`);
+    return response.data;
+  },
   deleteUserByAdmin: async (id) => {
     const response = await axiosInstance.delete(`/user/admin/users/${id}`);
     return response.data;

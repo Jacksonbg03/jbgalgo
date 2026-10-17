@@ -26,7 +26,15 @@ export const useAdminUsers = () => {
   });
 };
 
-const useAdminUserMutation = (key, mutationFn) => {
+export const useUserSubmissions = (id) => {
+  return useQuery({
+    queryKey: ["userSubmissions", id],
+    queryFn: () => userApi.getUserSubmissions(id),
+    enabled: !!id,
+  });
+};
+
+const useAdminUserMutation =(key, mutationFn) => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationKey: [key],

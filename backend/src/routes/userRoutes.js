@@ -5,7 +5,8 @@ import {
   updateUserLevel,
   listUsers,
   updateUserByAdmin,
-  deleteUserByAdmin
+  deleteUserByAdmin,
+  getUserSubmissions
 } from "../controllers/userController.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 
@@ -18,6 +19,7 @@ router.post("/level", protectRoute, updateUserLevel);
 
 // admin: manage users
 router.get("/admin/users", protectRoute, listUsers);
+router.get("/admin/users/:id/submissions", protectRoute, getUserSubmissions);
 router.patch("/admin/users/:id", protectRoute, updateUserByAdmin);
 router.delete("/admin/users/:id", protectRoute, deleteUserByAdmin);
 

@@ -158,15 +158,22 @@ export const submitProblem = async (req, res) => {
       if (normalizeOutput(actual) !== normalizeOutput(expected[i] || "")) passed = false;
     }
 
-    if (passed) {
+    // A failure of the code runner itself (rate limit, network) is not the student's attempt
+    const runnerFailed = /^(Code runner|Failed to execute code)/.test(error);
+    if (!runnerFailed) {
+      // Keep every student's latest code so the teacher can review it (and the student keeps their work).
+      // Once solved, the passing code is kept: later failing runs only count as attempts.
       const existing = user.solvedProblems.find((p) => p.problem?.toString() === problem._id.toString());
-      if (existing) {
-        existing.sourceCode = code;
-        existing.language = language;
-        existing.solved = true;
-        existing.submittedAt = new Date();
+      if (!existing) {
+        user.solvedProblems.push({ problem: problem._id, solved: passed, sourceCode: code, language, submittedAt: new Date(), attempts: 1 });
       } else {
-        user.solvedProblems.push({ problem: problem._id, solved: true, sourceCode: code, language, submittedAt: new Date() });
+        existing.attempts = (existing.attempts || 0) + 1;
+        if (passed || !existing.solved) {
+          existing.sourceCode = code;
+          existing.language = language;
+          existing.submittedAt = new Date();
+          if (passed) existing.solved = true;
+        }
       }
       await user.save();
     }

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import toast from "react-hot-toast";
-import { EyeIcon, EyeOffIcon, SaveIcon, SearchIcon, Trash2Icon } from "lucide-react";
+import { Link } from "react-router";
+import { CodeIcon, EyeIcon, EyeOffIcon, SaveIcon, SearchIcon, Trash2Icon } from "lucide-react";
 import Navbar from "../components/Navbar";
 import { useAdminUsers, useDeleteUserByAdmin, useGetUser, useUpdateUserByAdmin } from "../hooks/useUsers";
 
@@ -71,6 +72,10 @@ function UserRow({ user, isSelf }) {
       </td>
       <td>
         <div className="flex gap-1 justify-end">
+          <Link to={`/admin/users/${user._id}`} className="btn btn-sm btn-ghost gap-1" title="View code and solved problems">
+            <CodeIcon className="size-4" />
+            View
+          </Link>
           <button onClick={save} disabled={!changed || !name.trim() || busy} className="btn btn-sm btn-primary gap-1">
             <SaveIcon className="size-4" />
             Save

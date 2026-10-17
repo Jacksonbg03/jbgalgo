@@ -105,6 +105,41 @@ export const updateUserByAdmin = async (req, res) => {
   }
 };
 
+// One student's work: every problem they ran code on, with their latest (or passing) code
+export const getUserSubmissions = async (req, res) => {
+  try {
+    if (!requireAdmin(req, res)) return;
+    const { id } = req.params;
+    if (!mongoose.isValidObjectId(id)) return res.status(400).json({ message: "Invalid user id" });
+
+    const user = await User.findById(id)
+      .populate("solvedProblems.problem", "problemId title difficulty level hidden")
+      .lean();
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const submissions = (user.solvedProblems || [])
+      .filter((s) => s.problem) // problem may have been deleted
+      .map((s) => ({
+        problemId: s.problem.problemId,
+        title: s.problem.title,
+        difficulty: s.problem.difficulty,
+        problemHidden: !!s.problem.hidden,
+        solved: !!s.solved,
+        language: s.language,
+        sourceCode: s.sourceCode,
+        attempts: s.attempts || 0,
+        submittedAt: s.submittedAt,
+      }))
+      .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+
+    const { solvedProblems, clerkId, ...profile } = user;
+    return res.json({ user: profile, submissions });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 // Deletes the account everywhere: Clerk (so they can't sign in again) and MongoDB (progress included).
 export const deleteUserByAdmin = async (req, res) => {
   try {
