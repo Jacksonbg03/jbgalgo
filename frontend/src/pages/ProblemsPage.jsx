@@ -2,7 +2,7 @@ import { Link, Navigate } from "react-router";
 import Navbar from "../components/Navbar";
 
 import { useSolvedProblem} from "../hooks/useProblems";
-import { ChevronRightIcon, CirclePlus, Code2Icon, PencilIcon, Plus } from "lucide-react";
+import { ChevronRightIcon, CirclePlus, Code2Icon, PencilIcon, Plus, SearchIcon, SlidersHorizontalIcon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import { useUser } from "@clerk/clerk-react";
 import { useState, useMemo } from "react";
@@ -10,6 +10,28 @@ import { FilterSection } from "../components/FilterSection";
 import { Stat } from "../components/Stat";
 import { useNavigate } from "react-router";
 import { useGetUser } from "../hooks/useUsers";
+
+// a problem counts as "new" for a week after it is created, until the student solves it
+const NEW_FOR_DAYS = 7;
+const isNewProblem = (p) =>
+  !p.solved && !!p.createdAt && Date.now() - new Date(p.createdAt).getTime() < NEW_FOR_DAYS * 24 * 60 * 60 * 1000;
+
+const DIFFICULTY_RANK = { Easy: 1, Medium: 2, Hard: 3 };
+const byDifficulty = (a, b) =>
+  (DIFFICULTY_RANK[a.difficulty] || 0) - (DIFFICULTY_RANK[b.difficulty] || 0) ||
+  (a.difficultyLevel || 0) - (b.difficultyLevel || 0) ||
+  a.title.localeCompare(b.title);
+const byCreated = (a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0);
+const deadlineTime = (p) => (p.deadline?.[0] ? new Date(p.deadline[0]).getTime() : Infinity);
+
+const SORTS = {
+  newest: { label: "Newest first", compare: (a, b) => byCreated(b, a) },
+  oldest: { label: "Oldest first", compare: byCreated },
+  easy: { label: "Difficulty: Easy → Hard", compare: byDifficulty },
+  hard: { label: "Difficulty: Hard → Easy", compare: (a, b) => byDifficulty(b, a) },
+  title: { label: "Title: A → Z", compare: (a, b) => a.title.localeCompare(b.title) },
+  deadline: { label: "Deadline: soonest first", compare: (a, b) => deadlineTime(a) - deadlineTime(b) || byCreated(b, a) },
+};
 
 function ProblemsPage() {
   const { user } = useUser();
@@ -22,17 +44,21 @@ function ProblemsPage() {
   const problems = solvedProblems
 
   const [filters, setFilters] = useState({
-    status: { solved: false, unsolved: false, priority: false },
+    status: { new: false, solved: false, unsolved: false, priority: false },
     difficulty: { Easy: false, Medium: false, Hard: false },
-    category: {
-      "String": false,
-      "Array": false,
-      "Hash Table": false,
-      "Two Pointers": false,
-      "Dynamic Programming": false,
-    },
+    category: {},
   });
-  
+  const [search, setSearch] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const [showFilters, setShowFilters] = useState(false);
+
+  // categories come from the problems themselves instead of a fixed list
+  const categoryOptions = useMemo(() => {
+    const all = new Set();
+    (problems || []).forEach((p) => [].concat(p.category || []).forEach((c) => c && all.add(c)));
+    return [...all].sort();
+  }, [problems]);
+
   const handleCheckboxChange = (type, key) => {
     setFilters((prev) => ({
       ...prev,
@@ -47,15 +73,20 @@ function ProblemsPage() {
 const filteredProblems = useMemo(() => {
   if (!problems || !Array.isArray(problems)) return [];
 
+  const query = search.trim().toLowerCase();
+
   return problems
     .filter((p) => {
+      // SEARCH
+      if (query && !p.title.toLowerCase().includes(query)) return false;
+
       // STATUS
       const { solved, unsolved, priority } = filters.status;
       const deadline = p.deadline?.[0];
       const isPriority = deadline && p.createdAt && new Date(deadline) > new Date(p.createdAt) && p?.level[0] === userz?.level
 
-      let statusCheck = (p.solved && solved) || (!p.solved && unsolved) || (isPriority && priority);
-      if (!solved && !unsolved && !priority) statusCheck = true;
+      let statusCheck = (p.solved && solved) || (!p.solved && unsolved) || (isPriority && priority) || (isNewProblem(p) && filters.status.new);
+      if (!solved && !unsolved && !priority && !filters.status.new) statusCheck = true;
 
       // DIFFICULTY
       const difficulties = Object.values(filters.difficulty);
@@ -73,7 +104,8 @@ const filteredProblems = useMemo(() => {
 
       return statusCheck && difficultyCheck && categoryCheck;
     })
-}, [problems, filters]);
+    .sort(SORTS[sortBy].compare)
+}, [problems, filters, search, sortBy, userz?.level]);
 
 
   if (!problems) return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -118,6 +150,35 @@ const filteredProblems = useMemo(() => {
         <div className="flex flex-col lg:flex-row gap-10 items-start">
           {/* PROBLEM LIST */}
           <div className="w-full lg:w-[80%] space-y-4">
+            {/* SEARCH + SORT */}
+            <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+              <label className="input bg-base-100 flex items-center gap-2 w-full sm:flex-1">
+                <SearchIcon className="size-4 opacity-60" />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search problems"
+                  className="grow"
+                />
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="select bg-base-100 w-full sm:w-60"
+                  aria-label="Sort problems"
+                >
+                  {Object.entries(SORTS).map(([value, s]) => (
+                    <option key={value} value={value}>{s.label}</option>
+                  ))}
+                </select>
+                <button onClick={() => setShowFilters((v) => !v)} className="btn bg-base-100 gap-2 lg:hidden">
+                  <SlidersHorizontalIcon className="size-4" />
+                  Filters
+                </button>
+              </div>
+            </div>
+
             {filteredProblems.length === 0 ? (
               <div className="flex-1 flex items-center justify-center py-12 text-lg text-base-content/70">
                 Problem not found :(
@@ -139,6 +200,9 @@ const filteredProblems = useMemo(() => {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              {isNewProblem(problem) ? (
+                                <span className="badge badge-accent font-bold tracking-wide">NEW</span>
+                              ) : ""}
                               <h2 className="text-lg sm:text-xl font-bold">{problem.title}</h2>
                               <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
                                 {problem.difficulty}
@@ -196,10 +260,11 @@ const filteredProblems = useMemo(() => {
           </div>
 
           {/* FILTER SIDEBAR */}
-          <div className="hidden lg:block w-full lg:w-[20%] lg:sticky top-20 bg-base-300/10 p-4 rounded-xl shadow-sm">
+          <div className={`${showFilters ? "block" : "hidden"} lg:block order-first lg:order-none w-full lg:w-[20%] lg:sticky top-20 bg-base-300/10 p-4 rounded-xl shadow-sm`}>
             <FilterSection
               title="STATUS"
               options={[
+                { label: "New", value: "new", type: "status" },
                 { label: "Solved", value: "solved", type: "status" },
                 { label: "Unsolved", value: "unsolved", type: "status" },
                 { label: "Priority", value: "priority", type: "status"},
@@ -221,7 +286,7 @@ const filteredProblems = useMemo(() => {
 
             <FilterSection
               title="CATEGORY"
-              options={Object.keys(filters.category).map((key) => ({
+              options={categoryOptions.map((key) => ({
                 label: key,
                 value: key,
                 type: "category",
