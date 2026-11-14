@@ -1,20 +1,16 @@
 // Migrasi soal ke MongoDB. Soal yang problemId-nya sudah ada akan dilewati.
-// Usage (dari folder backend): npm run seed -- --level SMP --deadline 2026-10-04
-// --level (SMP/SMA) dan --deadline (YYYY-MM-DD) opsional; tanpa keduanya soal tidak punya deadline.
+// Usage (dari folder backend): npm run seed -- --set sesi1 --level SMP --deadline 2026-10-04
+// --set: kumpulan soal yang di-seed (default sesi1, lihat SETS di bawah).
+// --level (SMP/SMA) opsional; default dari set-nya (kalau ada), selain itu soal untuk semua level.
+// --deadline (YYYY-MM-DD) opsional, berarti akhir hari itu (WIB); tanpa ini soal tidak punya deadline.
 import mongoose from "mongoose";
 import Problem from "./src/models/Problems.js";
 import { ENV } from "./src/lib/env.js";
+import { INPUT_NOTE, javaMain, same } from "./problems/helpers.js";
+import * as stringSmp from "./problems/string-smp.js";
 
 // Soal Sesi 1: "Langkah Pertama - Apa itu Algoritma dan Coding?"
 // Materi: print, variabel, input, aritmatika (+ - * / %), if-else.
-// Format mengikuti model Problems: satu baris expectedOutput per hiddenInput, "\\n" = baris baru pada input.
-
-const INPUT_NOTE = "Gunakan input() tanpa teks pertanyaan, karena teks pertanyaan ikut terbaca sebagai output.";
-
-const javaMain = (body, withScanner = true) =>
-  `${withScanner ? "import java.util.Scanner;\n\n" : ""}public class Main {\n    public static void main(String[] args) {\n${body}\n    }\n}`;
-
-const same = (output) => ({ javascript: output, python: output, java: output });
 
 const PROBLEMS = [
   {
@@ -240,13 +236,30 @@ const arg = (name) => {
   return i !== -1 ? process.argv[i + 1] : undefined;
 };
 
+const SETS = {
+  sesi1: { PROBLEMS },
+  "string-smp": stringSmp,
+};
+
 const seed = async () => {
-  const level = arg("level");
-  const deadline = arg("deadline");
+  const setName = arg("set") || "sesi1";
+  const set = SETS[setName];
+  if (!set) {
+    console.error(`--set harus salah satu dari: ${Object.keys(SETS).join(", ")}`);
+    process.exit(1);
+  }
+  const level = arg("level") || set.LEVEL;
+  const deadlineArg = arg("deadline");
   if (level && !["SMP", "SMA"].includes(level)) {
     console.error("--level harus SMP atau SMA");
     process.exit(1);
   }
+  if (deadlineArg && !/^\d{4}-\d{2}-\d{2}$/.test(deadlineArg)) {
+    console.error("--deadline harus berformat YYYY-MM-DD");
+    process.exit(1);
+  }
+  // sama seperti form di web: deadline = akhir hari itu waktu Jakarta
+  const deadline = deadlineArg ? `${deadlineArg}T23:59:59+07:00` : undefined;
   if (!ENV.DB_URL) {
     console.error("DB_URL belum diisi di backend/.env");
     process.exit(1);
@@ -256,7 +269,8 @@ const seed = async () => {
     await mongoose.connect(ENV.DB_URL);
     console.log("MongoDB connected");
 
-    for (const p of PROBLEMS) {
+    console.log(`Set: ${setName}, level: ${level || "semua"}, deadline: ${deadline || "-"}`);
+    for (const p of set.PROBLEMS) {
       if (await Problem.exists({ problemId: p.problemId })) {
         console.log(`Lewati (sudah ada): ${p.title}`);
         continue;
