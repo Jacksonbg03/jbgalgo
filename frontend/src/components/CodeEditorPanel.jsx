@@ -7,19 +7,19 @@ function SaveStatus({ status }) {
   if (status === "pending" || status === "saving")
     return (
       <span className="flex items-center gap-1 text-xs text-base-content/50">
-        <Loader2Icon className="size-3.5 animate-spin" /> Saving
+        <Loader2Icon className="size-3.5 animate-spin" /> <span className="hidden sm:inline">Saving</span>
       </span>
     );
   if (status === "saved")
     return (
       <span className="flex items-center gap-1 text-xs text-base-content/50" title="Your code is saved, even without running it">
-        <CloudCheckIcon className="size-3.5" /> Saved
+        <CloudCheckIcon className="size-3.5" /> <span className="hidden sm:inline">Saved</span>
       </span>
     );
   if (status === "error")
     return (
       <span className="flex items-center gap-1 text-xs text-warning" title="Your code could not be saved. Check your connection.">
-        <CloudAlertIcon className="size-3.5" /> Not saved
+        <CloudAlertIcon className="size-3.5" /> <span className="hidden sm:inline">Not saved</span>
       </span>
     );
   return null;
@@ -36,12 +36,12 @@ function CodeEditorPanel({
 }) {
   return (
     <div className="h-full bg-base-300 flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 bg-base-100 border-t border-base-300">
+      <div className="flex items-center justify-between gap-2 px-3 sm:px-4 py-2 sm:py-3 bg-base-100 border-t border-base-300">
         <div className="flex items-center gap-3">
           <img
             src={LANGUAGE_CONFIG[selectedLanguage].icon}
             alt={LANGUAGE_CONFIG[selectedLanguage].name}
-            className="size-6"
+            className="size-6 hidden sm:block"
           />
           <select className="select select-sm" value={selectedLanguage} onChange={onLanguageChange}>
             {Object.entries(LANGUAGE_CONFIG).map(([key, lang]) => (

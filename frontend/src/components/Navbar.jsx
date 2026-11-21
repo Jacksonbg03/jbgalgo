@@ -12,7 +12,7 @@ function Navbar() {
 
   return (
     <nav className="bg-base-100/80 backdrop-blur-md border-b border-primary/20 sticky top-0 z-50 shadow-lg">
-      <div className="max-w-7xl mx-auto p-4 flex items-center justify-between">
+      <div className="max-w-7xl mx-auto px-3 py-3 sm:p-4 flex items-center justify-between gap-2">
         <Link
           to="/"
           className="group flex items-center gap-3 hover:scale-105 transition-transform duration-200"
@@ -21,7 +21,7 @@ function Navbar() {
             <img src={logo} alt="" className="min-w-[30px] w-[30px] h-[30px] rotate"/>
           </div>
 
-          <div className="flex flex-col">
+          <div className="hidden sm:flex flex-col">
             <span className="font-black text-xl bg-gradient-to-r from-primary via-[#FF7F50] via-[##FF6F00] to-[#FFC107] bg-clip-text text-transparent tracking-wider">
               JBGAlgo
             </span>
@@ -32,7 +32,7 @@ function Navbar() {
         <div className="flex items-center gap-1">
           <Link
             to={"/assignments"}
-            className={`px-4 py-2.5 rounded-lg transition-all duration-200
+            className={`px-2.5 sm:px-4 py-2.5 rounded-lg transition-all duration-200
               ${
                 isActive("/assignments")
                   ? "bg-primary text-primary-content"
@@ -48,7 +48,7 @@ function Navbar() {
 
           <Link
             to={"/problems"}
-            className={`px-4 py-2.5 rounded-lg transition-all duration-200 
+            className={`px-2.5 sm:px-4 py-2.5 rounded-lg transition-all duration-200 
               ${
                 isActive("/problems")
                   ? "bg-primary text-primary-content"
@@ -64,7 +64,7 @@ function Navbar() {
 
           {/* <Link
             to={"/sessions"}
-            className={`px-4 py-2.5 rounded-lg transition-all duration-200 
+            className={`px-2.5 sm:px-4 py-2.5 rounded-lg transition-all duration-200 
               ${
                 isActive("/sessions")
                   ? "bg-primary text-primary-content"
@@ -81,7 +81,7 @@ function Navbar() {
 
           <Link
             to={"/dashboard"}
-            className={`px-4 py-2.5 rounded-lg transition-all duration-200 
+            className={`px-2.5 sm:px-4 py-2.5 rounded-lg transition-all duration-200 
               ${
                 isActive("/dashboard")
                   ? "bg-primary text-primary-content"
@@ -99,7 +99,7 @@ function Navbar() {
           {isAdmin && (
             <Link
               to={"/admin/progress"}
-              className={`px-4 py-2.5 rounded-lg transition-all duration-200
+              className={`px-2.5 sm:px-4 py-2.5 rounded-lg transition-all duration-200
                 ${
                   isActive("/admin/progress")
                     ? "bg-primary text-primary-content"
@@ -117,7 +117,7 @@ function Navbar() {
           {isAdmin && (
             <Link
               to={"/admin/users"}
-              className={`px-4 py-2.5 rounded-lg transition-all duration-200
+              className={`px-2.5 sm:px-4 py-2.5 rounded-lg transition-all duration-200
                 ${
                   isActive("/admin/users")
                     ? "bg-primary text-primary-content"
@@ -132,7 +132,7 @@ function Navbar() {
             </Link>
           )}
 
-          <div className="ml-4 mt-2">
+          <div className="ml-1 sm:ml-4 mt-2">
             <UserButton />
           </div>
         </div>

@@ -36,7 +36,7 @@ function OutputPanel({ output, tests, total, error, isCorrect, solved, isRunning
   return (
     <div className="h-full bg-base-100 flex flex-col">
       {/* HEADER: the result in one line */}
-      <div className="flex items-center gap-3 px-4 py-2 bg-base-200 border-b border-base-300 min-h-11">
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-3 sm:px-4 py-2 bg-base-200 border-b border-base-300 min-h-11">
         <span className="font-semibold text-sm">Output</span>
         {isRunning ? (
           <span className="flex items-center gap-1.5 text-sm text-base-content/70">
@@ -44,7 +44,7 @@ function OutputPanel({ output, tests, total, error, isCorrect, solved, isRunning
           </span>
         ) : (
           s && (
-            <span className={`flex items-center gap-1.5 text-sm font-semibold ${s.className}`}>
+            <span className={`flex flex-wrap items-center gap-1.5 text-sm font-semibold ${s.className}`}>
               <Icon className="size-4" /> {s.label}
               {total > 0 && (status === "accepted" || status === "wrong") && (
                 <span className="font-normal text-base-content/70">
@@ -61,7 +61,7 @@ function OutputPanel({ output, tests, total, error, isCorrect, solved, isRunning
         ) : null}
       </div>
 
-      <div className="flex-1 overflow-auto p-4 space-y-3">
+      <div className="flex-1 overflow-auto p-3 sm:p-4 space-y-3">
         {!status && !isRunning && (
           <p className="text-base-content/50">Click "Run Code" to check your solution against the test cases.</p>
         )}

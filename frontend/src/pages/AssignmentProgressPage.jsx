@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router";
 import { CheckCircle2Icon, ClockAlertIcon, Loader2Icon, MinusIcon, RefreshCwIcon, SearchIcon, XCircleIcon } from "lucide-react";
 import Navbar from "../components/Navbar";
+import StudentCodeDialog from "../components/StudentCodeDialog";
 import { useAssignmentProgress } from "../hooks/useUsers";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import { formatDateTimeEN, timeLeftLabel } from "../lib/problemUtils";
@@ -57,6 +58,8 @@ function AssignmentProgressPage() {
   const [level, setLevel] = useState("all");
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("name");
+  // { student, problem } whose code is shown in the dialog
+  const [viewing, setViewing] = useState(null);
 
   // default: the nearest open deadline, otherwise the most recent one
   useEffect(() => {
@@ -91,7 +94,7 @@ function AssignmentProgressPage() {
           <div>
             <h1 className="text-3xl font-bold">Assignment Progress</h1>
             <p className="text-sm text-base-content/60">
-              Who finished which assignment, and when. Updates every 30 seconds
+              Who finished which assignment, and when. Click a result to see the student's code. Updates every 30 seconds
               {dataUpdatedAt ? ` (last update ${hhmm(dataUpdatedAt)})` : ""}.
             </p>
           </div>
@@ -210,7 +213,17 @@ function AssignmentProgressPage() {
                               </td>
                               {group.problems.map((p) => (
                                 <td key={p.problemId} className="whitespace-nowrap">
-                                  <Cell result={s.results[p.problemId]} deadline={group.deadline} />
+                                  {s.results[p.problemId] ? (
+                                    <button
+                                      onClick={() => setViewing({ student: s, problem: p })}
+                                      className="rounded-md px-1.5 py-1 -mx-1.5 hover:bg-base-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+                                      title={`See ${s.name}'s code`}
+                                    >
+                                      <Cell result={s.results[p.problemId]} deadline={group.deadline} />
+                                    </button>
+                                  ) : (
+                                    <Cell result={null} deadline={group.deadline} />
+                                  )}
                                 </td>
                               ))}
                               <td className="text-right whitespace-nowrap">
@@ -239,6 +252,7 @@ function AssignmentProgressPage() {
           </>
         )}
       </div>
+      {viewing && <StudentCodeDialog student={viewing.student} problem={viewing.problem} onClose={() => setViewing(null)} />}
     </div>
   );
 }

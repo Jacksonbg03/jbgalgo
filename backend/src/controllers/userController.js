@@ -192,8 +192,14 @@ export const getUserSubmissions = async (req, res) => {
 
     const user = await User.findById(id)
       .populate("solvedProblems.problem", "problemId title difficulty level hidden")
+      .populate("drafts.problem", "problemId")
       .lean();
     if (!user) return res.status(404).json({ message: "User not found" });
+
+    // code being written that may not have been run yet (autosaved while typing)
+    const drafts = (user.drafts || [])
+      .filter((d) => d.problem)
+      .map((d) => ({ problemId: d.problem.problemId, language: d.language, code: d.code, updatedAt: d.updatedAt }));
 
     const submissions = (user.solvedProblems || [])
       .filter((s) => s.problem) // problem may have been deleted
@@ -210,8 +216,8 @@ export const getUserSubmissions = async (req, res) => {
       }))
       .sort((a, b) => new Date(b.submittedAt) - new Date(a.submittedAt));
 
-    const { solvedProblems, clerkId, ...profile } = user;
-    return res.json({ user: profile, submissions });
+    const { solvedProblems, clerkId, drafts: _drafts, ...profile } = user;
+    return res.json({ user: profile, submissions, drafts });
   } catch (error) {
     console.error(error);
     return res.status(500).json({ message: "Server error" });

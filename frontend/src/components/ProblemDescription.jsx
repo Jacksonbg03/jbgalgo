@@ -13,21 +13,18 @@ function ProblemDescription({ problem, currentProblemId, onProblemChange, allPro
   return (
     <div className="h-full flex flex-col bg-base-200">
       {/* HEADER: stays visible while the description scrolls */}
-      <div className="px-5 py-4 bg-base-100 border-b border-base-300 space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h1 className="text-2xl font-bold text-base-content">{problem.title}</h1>
-              <span className={`badge badge-sm ${getDifficultyBadgeClass(problem.difficulty)}`}>{problem.difficulty}</span>
-              {solved === true && (
-                <span className="badge badge-sm gap-1 bg-green-500/20 text-green-400 border border-green-500/30">
-                  <CheckCircle2Icon className="size-3" /> Solved
-                </span>
-              )}
-            </div>
-            <p className="text-sm text-base-content/60">{problem.category.join(" · ")}</p>
-          </div>
-          <DeadlineBadge problem={problem} user={user} />
+      <div className="px-4 sm:px-5 py-3 sm:py-4 bg-base-100 border-b border-base-300 space-y-2">
+        <h1 className="text-xl sm:text-2xl font-bold text-base-content leading-tight">{problem.title}</h1>
+        {/* badges wrap onto new lines on narrow screens instead of squeezing the title */}
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className={`badge badge-sm ${getDifficultyBadgeClass(problem.difficulty)}`}>{problem.difficulty}</span>
+          {solved === true && (
+            <span className="badge badge-sm gap-1 bg-green-500/20 text-green-400 border border-green-500/30">
+              <CheckCircle2Icon className="size-3" /> Solved
+            </span>
+          )}
+          <DeadlineBadge problem={problem} user={user} className="badge-sm" />
+          <span className="text-sm text-base-content/60">{problem.category.join(" · ")}</span>
         </div>
 
         <select
@@ -45,7 +42,7 @@ function ProblemDescription({ problem, currentProblemId, onProblemChange, allPro
       </div>
 
       {/* BODY */}
-      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-5">
         <section className="space-y-2 leading-relaxed">
           <p className="text-base-content/90">{problem.description.text || ""}</p>
           {notes.length > 0 && (
