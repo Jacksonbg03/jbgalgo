@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router";
-import { BookOpenIcon, LayoutDashboardIcon, Presentation, SparklesIcon, UsersIcon } from "lucide-react";
+import { BookOpenIcon, ClipboardListIcon, LayoutDashboardIcon, Presentation, SparklesIcon, UsersIcon } from "lucide-react";
 import { UserButton } from "@clerk/clerk-react";
 import logo from "../../public/logo.png";
 import { useGetUser } from "../hooks/useUsers";
@@ -31,6 +31,22 @@ function Navbar() {
 
         <div className="flex items-center gap-1">
           <Link
+            to={"/assignments"}
+            className={`px-4 py-2.5 rounded-lg transition-all duration-200
+              ${
+                isActive("/assignments")
+                  ? "bg-primary text-primary-content"
+                  : "hover:bg-base-200 text-base-content/70 hover:text-base-content"
+              }
+              `}
+          >
+            <div className="flex items-center gap-x-2.5">
+              <ClipboardListIcon className="size-4" />
+              <span className="font-medium hidden lg:inline">Assignments</span>
+            </div>
+          </Link>
+
+          <Link
             to={"/problems"}
             className={`px-4 py-2.5 rounded-lg transition-all duration-200 
               ${
@@ -42,7 +58,7 @@ function Navbar() {
           >
             <div className="flex items-center gap-x-2.5">
               <BookOpenIcon className="size-4" />
-              <span className="font-medium hidden sm:inline">Problems</span>
+              <span className="font-medium hidden lg:inline">Problems</span>
             </div>
           </Link>
 
@@ -59,7 +75,7 @@ function Navbar() {
           >
             <div className="flex items-center gap-x-2.5">
               <Presentation className="size-4" />
-              <span className="font-medium hidden sm:inline">Sessions</span>
+              <span className="font-medium hidden lg:inline">Sessions</span>
             </div>
           </Link> */}
 
@@ -76,7 +92,7 @@ function Navbar() {
           >
             <div className="flex items-center gap-x-2.5">
               <LayoutDashboardIcon className="size-4" />
-              <span className="font-medium hidden sm:inline">Dashboard</span>
+              <span className="font-medium hidden lg:inline">Dashboard</span>
             </div>
           </Link>
 
@@ -93,7 +109,7 @@ function Navbar() {
             >
               <div className="flex items-center gap-x-2.5">
                 <UsersIcon className="size-4" />
-                <span className="font-medium hidden sm:inline">Users</span>
+                <span className="font-medium hidden lg:inline">Users</span>
               </div>
             </Link>
           )}

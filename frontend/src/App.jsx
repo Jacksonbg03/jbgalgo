@@ -10,6 +10,7 @@ import { AddProblemPage } from "./pages/CreateProblemPage";
 import { useGetUser } from "./hooks/useUsers";
 import UsersPage from "./pages/UsersPage";
 import UserSubmissionsPage from "./pages/UserSubmissionsPage";
+import AssignmentsPage from "./pages/AssignmentsPage";
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
@@ -25,6 +26,7 @@ function App() {
         <Route path="/" element={!isSignedIn ? <HomePage /> : <Navigate to={"/dashboard"} />} />
         <Route path="/dashboard" element={isSignedIn ? <DashboardPage /> : <Navigate to={"/"} />} />
 
+        <Route path="/assignments" element={isSignedIn ? <AssignmentsPage /> : <Navigate to={"/"} />} />
         <Route path="/problems" element={isSignedIn ? <ProblemsPage /> : <Navigate to={"/"} />} />
         <Route path="/problem/:id" element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/problems/add" element={isSignedIn && userz.role === "Admin" ? <AddProblemPage /> : <Navigate to={"/"} />} />

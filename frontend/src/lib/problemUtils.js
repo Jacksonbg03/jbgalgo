@@ -138,3 +138,65 @@ export const generateStarterCode = ({ functionName, params, returnType }) => {
 
   return { javascript, python, java };
 };
+
+// ---------- assignments ----------
+// An assignment is a problem with a deadline that is shown to this user.
+
+// "Saturday, 21 Nov 2026, 14:32" (Jakarta time)
+export const formatDateTimeEN = (raw) => {
+  if (!raw) return "";
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleString("en-GB", {
+    weekday: "long", day: "numeric", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit", timeZone: JAKARTA,
+  });
+};
+
+// "Saturday, 21 Nov 2026" (Jakarta time)
+export const formatDateEN = (raw) =>
+  new Date(raw).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric", timeZone: JAKARTA });
+
+// "3 days left" / "5 hours left" / "20 minutes left"
+export const timeLeftLabel = (date, now = Date.now()) => {
+  const ms = new Date(date).getTime() - now;
+  if (ms <= 0) return "closed";
+  const minutes = Math.floor(ms / 60000);
+  if (minutes < 60) return `${Math.max(minutes, 1)} min left`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? "" : "s"} left`;
+  const days = Math.floor(hours / 24);
+  return `${days} day${days === 1 ? "" : "s"} left`;
+};
+
+/**
+ * Status of one assignment for this user:
+ * "done" (solved before the deadline), "late" (solved after it), "pending" (still open), "missed" (deadline passed, not solved).
+ */
+export const assignmentStatus = (problem, deadline) => {
+  if (problem.solved) {
+    const at = problem.solvedAt ? new Date(problem.solvedAt).getTime() : null;
+    return at && at > deadline.getTime() ? "late" : "done";
+  }
+  return deadline.getTime() < Date.now() ? "missed" : "pending";
+};
+
+/** Problems with a deadline for this user, grouped per deadline day, upcoming groups first. */
+export const getAssignmentGroups = (problems, user) => {
+  const groups = new Map();
+  for (const problem of problems || []) {
+    const info = getDeadlineInfo(problem, user);
+    if (!info) continue;
+    const key = toDateInputValue(info.date);
+    if (!groups.has(key)) groups.set(key, { key, deadline: info.date, overdue: info.overdue, items: [] });
+    groups.get(key).items.push({ problem, status: assignmentStatus(problem, info.date) });
+  }
+  const list = [...groups.values()];
+  list.forEach((g) => {
+    g.solved = g.items.filter((i) => i.status === "done" || i.status === "late").length;
+    g.items.sort((a, b) => (a.problem.difficultyLevel || 0) - (b.problem.difficultyLevel || 0) || a.problem.title.localeCompare(b.problem.title));
+  });
+  const upcoming = list.filter((g) => !g.overdue).sort((a, b) => a.deadline - b.deadline);
+  const past = list.filter((g) => g.overdue).sort((a, b) => b.deadline - a.deadline);
+  return { upcoming, past };
+};

@@ -214,6 +214,9 @@ export const getSolvedProblem = async (req, res) => {
       return {
         ...p._doc,
         solved: status ? status.solved : false,
+        // once solved, submittedAt is no longer updated, so it is the time of the passing run
+        solvedAt: status?.solved ? status.submittedAt : null,
+        attempts: status?.attempts || 0,
         saveLanguageUser: status && status?.language ? status.language : "",
         saveSourceCode: status && status?.sourceCode ? status.sourceCode : ""
       };
