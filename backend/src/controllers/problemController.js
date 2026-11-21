@@ -193,6 +193,35 @@ export const submitProblem = async (req, res) => {
 };
 
 // Full problem including test cases, for the admin edit form
+const MAX_DRAFT_LENGTH = 50000;
+
+// Autosave of the code a student is writing, so nothing is lost before (or without) a run.
+export const saveDraft = async (req, res) => {
+  try {
+    const { code, language } = req.body || {};
+    if (!LANGUAGES.includes(language) || typeof code !== "string" || code.length > MAX_DRAFT_LENGTH) {
+      return res.status(400).json({ message: "Invalid code or language" });
+    }
+
+    const problem = await Problems.findOne({ problemId: req.params.problemId }).select("_id level hidden");
+    if (!problem || !canStudentSee(problem, req.user)) return res.status(404).json({ message: "Problem not found" });
+
+    const updatedAt = new Date();
+    // update this problem + language's draft in place, or add it
+    const updated = await User.updateOne(
+      { _id: req.user._id, drafts: { $elemMatch: { problem: problem._id, language } } },
+      { $set: { "drafts.$.code": code, "drafts.$.updatedAt": updatedAt } }
+    );
+    if (updated.matchedCount === 0) {
+      await User.updateOne({ _id: req.user._id }, { $push: { drafts: { problem: problem._id, language, code, updatedAt } } });
+    }
+    return res.json({ savedAt: updatedAt });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
+
 export const getProblemForEdit = async (req, res) => {
   try {
     if (req.user.role !== "Admin") return res.status(403).json({ message: "Forbidden" });
@@ -212,10 +241,16 @@ export const getSolvedProblem = async (req, res) => {
 
     const visibility = user.role === "Admin" ? {} : studentProblemFilter(user);
     const problems = await Problems.find(visibility).select(HIDE_ANSWERS).sort({ difficultyLevel: 1, problemId: 1});
+    const drafts = user.drafts || [];
     const results = problems.map((p) => {
       const status = solvedProblems.find(
           (up) => up.problem?.toString() === p._id.toString()
       );
+      // autosaved code per language: { python: { code, updatedAt }, ... }
+      const problemDrafts = {};
+      for (const d of drafts) {
+        if (d.problem?.toString() === p._id.toString()) problemDrafts[d.language] = { code: d.code, updatedAt: d.updatedAt };
+      }
       return {
         ...p._doc,
         solved: status ? status.solved : false,
@@ -223,7 +258,9 @@ export const getSolvedProblem = async (req, res) => {
         solvedAt: status?.solved ? status.submittedAt : null,
         attempts: status?.attempts || 0,
         saveLanguageUser: status && status?.language ? status.language : "",
-        saveSourceCode: status && status?.sourceCode ? status.sourceCode : ""
+        saveSourceCode: status && status?.sourceCode ? status.sourceCode : "",
+        savedAt: status?.submittedAt || null,
+        drafts: problemDrafts,
       };
     });
 

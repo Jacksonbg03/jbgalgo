@@ -30,6 +30,12 @@ export const problemsApi = {
     return response.data;
   },
 
+  // autosave of the code being written (per problem and language)
+  saveDraft: async ({ problemId, code, language }) => {
+    const response = await axiosInstance.put(`/problems/problem/${problemId}/draft`, { code, language });
+    return response.data;
+  },
+
   // // Tambah problem baru (admin)
   addProblem: async (data) => {
     const response = await axiosInstance.post("/problems/add", data);

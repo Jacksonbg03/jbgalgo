@@ -1,11 +1,35 @@
 import Editor from "@monaco-editor/react";
-import { Loader2Icon, PlayIcon } from "lucide-react";
+import { CloudAlertIcon, CloudCheckIcon, Loader2Icon, PlayIcon } from "lucide-react";
 import { LANGUAGE_CONFIG } from "../data/problems";
+
+// autosave state shown next to the Run button
+function SaveStatus({ status }) {
+  if (status === "pending" || status === "saving")
+    return (
+      <span className="flex items-center gap-1 text-xs text-base-content/50">
+        <Loader2Icon className="size-3.5 animate-spin" /> Saving
+      </span>
+    );
+  if (status === "saved")
+    return (
+      <span className="flex items-center gap-1 text-xs text-base-content/50" title="Your code is saved, even without running it">
+        <CloudCheckIcon className="size-3.5" /> Saved
+      </span>
+    );
+  if (status === "error")
+    return (
+      <span className="flex items-center gap-1 text-xs text-warning" title="Your code could not be saved. Check your connection.">
+        <CloudAlertIcon className="size-3.5" /> Not saved
+      </span>
+    );
+  return null;
+}
 
 function CodeEditorPanel({
   selectedLanguage,
   code,
   isRunning,
+  saveStatus,
   onLanguageChange,
   onCodeChange,
   onRunCode,
@@ -28,6 +52,8 @@ function CodeEditorPanel({
           </select>
         </div>
 
+        <div className="flex items-center gap-3">
+        <SaveStatus status={saveStatus} />
         <button className="btn btn-primary btn-sm gap-2" disabled={isRunning} onClick={onRunCode}>
           {isRunning ? (
             <>
@@ -41,6 +67,7 @@ function CodeEditorPanel({
             </>
           )}
         </button>
+        </div>
       </div>
 
       <div className="flex-1">

@@ -64,6 +64,16 @@ const userSchema = new mongoose.Schema(
         },
       },
     ],
+    // code being written, autosaved while typing (before or without a run), one per problem and language
+    drafts: [
+      {
+        problem: { type: mongoose.Schema.Types.ObjectId, ref: "Problem", required: true },
+        language: { type: String, required: true },
+        code: { type: String, default: "" },
+        updatedAt: { type: Date, default: Date.now },
+        _id: false,
+      },
+    ],
   },
   { timestamps: true } // createdAt, updatedAt
 );

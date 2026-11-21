@@ -6,7 +6,8 @@ import {
   getProblemById,
   getProblemForEdit,
   getProblems,
-  getSolvedProblem
+  getSolvedProblem,
+  saveDraft
 } from "../controllers/problemController.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 
@@ -20,6 +21,8 @@ router.get("/problem/:problemId", getProblemById);
 router.get("/problem", getProblems);
 
 router.post("/problem/:problemId/submit", protectRoute, submitProblem);
+// autosave while typing
+router.put("/problem/:problemId/draft", protectRoute, saveDraft);
 router.post("/add", protectRoute, addProblem);
 router.put("/problem/:problemId", protectRoute, updateProblem);
 

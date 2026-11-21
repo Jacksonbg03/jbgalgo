@@ -13,9 +13,38 @@ import confetti from "canvas-confetti";
 import { useProblemById, useSubmitProblem, useSolvedProblem } from "../hooks/useProblems";
 import { Loader2Icon } from "lucide-react";
 import { useGetUser } from "../hooks/useUsers";
+import { problemsApi } from "../api/problems";
 
 // output panel height (% of the editor column) once code has been run
 const OUTPUT_SIZE_AFTER_RUN = 45;
+// autosave this long after the student stops typing
+const DRAFT_SAVE_DELAY_MS = 1000;
+
+// code typed in this browser session, so switching language or coming back to a problem keeps the latest code
+const sessionDrafts = new Map(); // "problemId:language" -> code
+
+// latest code for a problem in a language: this session's typing, then the newer of draft / last run, then the starter
+function codeFor(problem, language) {
+  const local = sessionDrafts.get(`${problem.problemId}:${language}`);
+  if (local !== undefined) return local;
+  const draft = problem.drafts?.[language];
+  const saved = problem.saveLanguageUser === language && problem.saveSourceCode ? problem.saveSourceCode : null;
+  if (draft && (!saved || new Date(draft.updatedAt) >= new Date(problem.savedAt || 0))) return draft.code;
+  if (saved) return saved;
+  return problem.starterCode?.[language] || "";
+}
+
+// the language the student last worked in on this problem
+function lastLanguage(problem, fallback) {
+  let language = null;
+  let at = -Infinity;
+  for (const [lang, draft] of Object.entries(problem.drafts || {})) {
+    const t = new Date(draft.updatedAt).getTime();
+    if (t > at) [language, at] = [lang, t];
+  }
+  if (problem.saveLanguageUser && new Date(problem.savedAt || 0).getTime() > at) language = problem.saveLanguageUser;
+  return language || fallback;
+}
 
 function ProblemPage() {
   const { id } = useParams();
@@ -55,20 +84,60 @@ function ProblemPage() {
   // SMA classes learn JavaScript (p5.js), SMP classes Python
   const defaultLanguage = userz.level === "SMA" ? "javascript" : "python";
 
-  // fetch problem from backend
+  // ---------- autosave ----------
+  const [saveStatus, setSaveStatus] = useState(""); // "", "pending", "saving", "saved", "error"
+  const pendingSave = useRef(null); // { timer, problemId, language, code }
+
+  const flushSave = () => {
+    const pending = pendingSave.current;
+    if (!pending) return;
+    clearTimeout(pending.timer);
+    pendingSave.current = null;
+    setSaveStatus("saving");
+    problemsApi
+      .saveDraft({ problemId: pending.problemId, language: pending.language, code: pending.code })
+      .then(() => setSaveStatus((s) => (s === "saving" ? "saved" : s)))
+      .catch(() => setSaveStatus("error"));
+  };
+
+  const handleCodeChange = (value) => {
+    const newCode = value ?? "";
+    setCode(newCode);
+    if (!currentProblemId) return;
+    sessionDrafts.set(`${currentProblemId.problemId}:${selectedLanguage}`, newCode);
+    if (pendingSave.current) clearTimeout(pendingSave.current.timer);
+    pendingSave.current = {
+      problemId: currentProblemId.problemId,
+      language: selectedLanguage,
+      code: newCode,
+      timer: setTimeout(flushSave, DRAFT_SAVE_DELAY_MS),
+    };
+    setSaveStatus("pending");
+  };
+
+  // save right away when the tab is hidden or the page is left
+  useEffect(() => {
+    const onHide = () => document.visibilityState === "hidden" && flushSave();
+    document.addEventListener("visibilitychange", onHide);
+    return () => {
+      document.removeEventListener("visibilitychange", onHide);
+      flushSave();
+    };
+  }, []);  
+
+  // Load the problem. Keyed on its id (plus whether the student's list version with saved code and drafts
+  // has arrived), so a background refetch never overwrites what the student is typing;
+  // what they typed this session always wins in codeFor().
+  const problemKey = problem ? `${problem.problemId}:${index !== -1 ? "full" : "basic"}` : null;
   useEffect(() => {
     if (problem) {
+      flushSave();
+      setSaveStatus("");
       setCurrentProblemId(problem);
-      // a student's saved code opens in the language they wrote it in
-      const language = problem?.saveLanguageUser || (problem.starterCode?.[defaultLanguage] ? defaultLanguage : "python");
+      // open in the language the student last worked in, otherwise their class's language
+      const language = lastLanguage(problem, problem.starterCode?.[defaultLanguage] ? defaultLanguage : "python");
       setSelectedLanguage(language);
-
-      if (problem?.saveSourceCode){
-        setCode(problem.saveSourceCode);
-      }
-      else{
-        setCode(problem.starterCode[language]);
-      }
+      setCode(codeFor(problem, language));
 
       setOutputArr([])
       setTestInfo(null);
@@ -76,16 +145,18 @@ function ProblemPage() {
       setError(null);
       setSolved(problem.solved || null);
     }
-  }, [problem, defaultLanguage]);
+  }, [problemKey, defaultLanguage]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // keep the solved badge in sync when the list refreshes
+  useEffect(() => {
+    if (problem?.solved) setSolved(true);
+  }, [problem?.solved]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
+    flushSave();
     setSelectedLanguage(newLang);
-    if (currentProblemId?.saveSourceCode && currentProblemId?.saveLanguageUser === newLang){
-      setCode(currentProblemId.saveSourceCode);
-    }else{
-      setCode(currentProblemId.starterCode[newLang]);
-    }
+    setCode(codeFor(currentProblemId, newLang));
     setOutputArr([])
     setTestInfo(null);
     setIsCorrect(null);
@@ -111,6 +182,7 @@ function ProblemPage() {
 
   // The server runs the hidden test cases and decides pass/fail, so students can't fake a solve.
   const handleRunCode = async () => {
+    flushSave();
     setIsRunning(true);
     setOutputArr([])
     setTestInfo(null);
@@ -205,7 +277,8 @@ function ProblemPage() {
                     code={code}
                     isRunning={isRunning}
                     onLanguageChange={handleLanguageChange}
-                    onCodeChange={setCode}
+                    onCodeChange={handleCodeChange}
+                    saveStatus={saveStatus}
                     onRunCode={handleRunCode}
                   />
                 </Panel>
@@ -254,7 +327,8 @@ function ProblemPage() {
                     code={code}
                     isRunning={isRunning}
                     onLanguageChange={handleLanguageChange}
-                    onCodeChange={setCode}
+                    onCodeChange={handleCodeChange}
+                    saveStatus={saveStatus}
                     onRunCode={handleRunCode}
                   />
                 </Panel>
