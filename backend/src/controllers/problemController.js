@@ -1,6 +1,6 @@
 import User from "../models/User.js";
 import Problems from "../models/Problems.js";
-import { runCode } from "../lib/codeRunner.js";
+import { runTests } from "../lib/codeRunner.js";
 
 // Students only see problems for their own level (SMP/SMA); problems without a level are for everyone.
 // level is stored as [] / [""] / ["SMP"], or as a plain string on some older problems.
@@ -141,11 +141,12 @@ export const submitProblem = async (req, res) => {
       return res.json({ passed: false, outputs: [], error: "This problem has no test cases yet." });
     }
 
-    const results = await Promise.all(inputs.map((input) => runCode(language, code, input.replace(/\\n/g, "\n"))));
+    const results = await runTests(language, code, inputs.map((input) => input.replace(/\\n/g, "\n")));
 
     const outputs = [];
     let error = "";
-    let passed = true;
+    // fewer results than test cases only happens when a run failed
+    let passed = results.length === inputs.length;
     for (let i = 0; i < results.length; i++) {
       const result = results[i];
       if (result.error && result.error.trim() !== "") {

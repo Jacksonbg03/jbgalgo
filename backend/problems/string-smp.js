@@ -1,103 +1,101 @@
-// Soal String Manipulation untuk SMP.
-// Materi: huruf besar/kecil, mengambil karakter dengan indeks, membalik string, digabung dengan if-else.
+// String manipulation problems for SMP.
+// Topics: upper/lower case, picking a character by index, reversing a string, combined with if-else.
 import { INPUT_NOTE, javaMain, same } from "./helpers.js";
 
 export const LEVEL = "SMP";
 
+const jsInput = (...names) =>
+  'const input = require("fs").readFileSync(0, "utf8").split("\\n");\n' +
+  names.map((name, i) => `const ${name} = input[${i}].trim();\n`).join("") +
+  "\n// Write your code below\n";
+
 export const PROBLEMS = [
   {
     problemId: "teriak",
-    title: "Teriak!",
+    title: "Shout!",
     difficulty: "Easy",
     difficultyLevel: 1,
     category: ["String"],
     description: {
-      text: "Ayo berteriak! Program menerima sebuah kalimat, lalu menampilkan kalimat tersebut dengan semua huruf diubah menjadi huruf besar (kapital) dan diberi tanda seru (!) di akhir.",
+      text: "Time to shout! The program reads a sentence and prints it with every letter in uppercase, followed by an exclamation mark (!).",
       notes: [
         INPUT_NOTE,
-        "Petunjuk: Python: kalimat.upper(), JavaScript: kalimat.toUpperCase(), Java: kalimat.toUpperCase().",
-        "Angka dan spasi tidak berubah, hanya huruf yang menjadi kapital.",
+        "Hint: Python: sentence.upper(), JavaScript: sentence.toUpperCase(), Java: sentence.toUpperCase().",
+        "Digits and spaces stay the same; only letters become uppercase.",
       ],
     },
     examples: [
-      { input: "aku suka coding", output: "AKU SUKA CODING!", explanation: "Semua huruf menjadi kapital, lalu ditambah !" },
-      { input: "Halo Dunia", output: "HALO DUNIA!", explanation: "" },
+      { input: "i love coding", output: "I LOVE CODING!", explanation: "Every letter becomes uppercase, then ! is added." },
+      { input: "Hello World", output: "HELLO WORLD!", explanation: "" },
     ],
-    constraints: ["Input berupa satu baris kalimat (huruf, angka, dan spasi)."],
+    constraints: ["The input is a single line (letters, digits and spaces)."],
     starterCode: {
-      python: "kalimat = input()\n\n# Tulis kode kamu di bawah ini\n",
-      javascript:
-        'const input = require("fs").readFileSync(0, "utf8").split("\\n");\nconst kalimat = input[0].trim();\n\n// Tulis kode kamu di bawah ini\n',
-      java: javaMain("        Scanner sc = new Scanner(System.in);\n        String kalimat = sc.nextLine();\n\n        // Tulis kode kamu di bawah ini\n        "),
+      python: "sentence = input()\n\n# Write your code below\n",
+      javascript: jsInput("sentence"),
+      java: javaMain("        Scanner sc = new Scanner(System.in);\n        String sentence = sc.nextLine();\n\n        // Write your code below\n        "),
     },
-    hiddenInputs: ["aku suka coding", "Halo Dunia", "jbgalgo", "Belajar Python Itu Seru", "smp 2 kelas b"],
-    expectedOutput: same(
-      ["AKU SUKA CODING!", "HALO DUNIA!", "JBGALGO!", "BELAJAR PYTHON ITU SERU!", "SMP 2 KELAS B!"].join("\n")
-    ),
+    hiddenInputs: ["i love coding", "Hello World", "jbgalgo", "Learning Python Is Fun", "class 8 b"],
+    expectedOutput: same(["I LOVE CODING!", "HELLO WORLD!", "JBGALGO!", "LEARNING PYTHON IS FUN!", "CLASS 8 B!"].join("\n")),
   },
   {
     problemId: "inisial-nama",
-    title: "Inisial Nama",
+    title: "Name Initials",
     difficulty: "Easy",
     difficultyLevel: 1,
     category: ["String", "Input"],
     description: {
-      text: "Buatlah inisial dari nama seseorang! Program menerima dua baris input: nama depan dan nama belakang. Ambil huruf pertama dari masing-masing nama, ubah menjadi huruf besar, lalu tampilkan sebagai inisial.",
+      text: "Turn a name into initials. The program reads two lines: a first name and a last name. Take the first letter of each name, make it uppercase, and print the initials.",
       notes: [
-        "Format output: Inisial: [huruf depan].[huruf belakang].",
+        "Output format: Initials: [first letter].[last letter].",
         INPUT_NOTE,
-        "Petunjuk: huruf pertama ada di indeks 0. Python & JavaScript: nama[0], Java: nama.charAt(0).",
-        "Nama bisa ditulis dengan huruf kecil, jadi pastikan inisialnya diubah ke huruf besar.",
+        "Hint: the first letter is at index 0. Python and JavaScript: name[0], Java: name.charAt(0).",
+        "Names may be written in lowercase, so make sure the initials are uppercase.",
       ],
     },
     examples: [
-      { input: "Budi\\nSantoso", output: "Inisial: B.S.", explanation: "B dari Budi, S dari Santoso." },
-      { input: "siti\\naminah", output: "Inisial: S.A.", explanation: "Huruf kecil s dan a diubah menjadi S dan A." },
+      { input: "Budi\\nSantoso", output: "Initials: B.S.", explanation: "B from Budi, S from Santoso." },
+      { input: "siti\\naminah", output: "Initials: S.A.", explanation: "Lowercase s and a become S and A." },
     ],
-    constraints: ["Input terdiri dari 2 baris: nama depan dan nama belakang.", "Setiap nama terdiri dari satu kata."],
+    constraints: ["The input has 2 lines: the first name and the last name.", "Each name is a single word."],
     starterCode: {
-      python: "depan = input()\nbelakang = input()\n\n# Tulis kode kamu di bawah ini\n",
-      javascript:
-        'const input = require("fs").readFileSync(0, "utf8").split("\\n");\nconst depan = input[0].trim();\nconst belakang = input[1].trim();\n\n// Tulis kode kamu di bawah ini\n',
+      python: "first = input()\nlast = input()\n\n# Write your code below\n",
+      javascript: jsInput("first", "last"),
       java: javaMain(
-        "        Scanner sc = new Scanner(System.in);\n        String depan = sc.nextLine();\n        String belakang = sc.nextLine();\n\n        // Tulis kode kamu di bawah ini\n        "
+        "        Scanner sc = new Scanner(System.in);\n        String first = sc.nextLine();\n        String last = sc.nextLine();\n\n        // Write your code below\n        "
       ),
     },
     hiddenInputs: ["Budi\\nSantoso", "siti\\naminah", "Jackson\\nbhakti", "kevin\\nWijaya", "Ani\\nputri"],
-    expectedOutput: same(
-      ["Inisial: B.S.", "Inisial: S.A.", "Inisial: J.B.", "Inisial: K.W.", "Inisial: A.P."].join("\n")
-    ),
+    expectedOutput: same(["Initials: B.S.", "Initials: S.A.", "Initials: J.B.", "Initials: K.W.", "Initials: A.P."].join("\n")),
   },
   {
     problemId: "cek-palindrom",
-    title: "Cek Palindrom",
+    title: "Palindrome Check",
     difficulty: "Medium",
     difficultyLevel: 2,
     category: ["String", "If-Else"],
     description: {
-      text: "Palindrom adalah kata yang sama jika dibaca dari depan maupun dari belakang, contohnya katak dan malam. Program menerima sebuah kata. Tampilkan Palindrom jika kata tersebut palindrom, atau Bukan Palindrom jika bukan.",
+      text: "A palindrome is a word that reads the same forwards and backwards, like level or noon. The program reads one word. Print Palindrome if the word is a palindrome, or Not Palindrome if it is not.",
       notes: [
         INPUT_NOTE,
-        "Huruf besar dan kecil dianggap sama: Kodok termasuk palindrom. Ubah dulu kata menjadi huruf kecil semua.",
-        "Petunjuk membalik kata: Python: kata[::-1], JavaScript: kata.split(\"\").reverse().join(\"\"), Java: new StringBuilder(kata).reverse().toString().",
-        "Di Java, bandingkan string dengan .equals(), bukan ==.",
+        "Uppercase and lowercase letters count as the same: Racecar is a palindrome. Convert the word to lowercase first.",
+        'Hint for reversing a word: Python: word[::-1], JavaScript: word.split("").reverse().join(""), Java: new StringBuilder(word).reverse().toString().',
+        "In Java, compare strings with .equals(), not ==.",
       ],
     },
     examples: [
-      { input: "katak", output: "Palindrom", explanation: "katak dibalik tetap katak." },
-      { input: "kasur", output: "Bukan Palindrom", explanation: "kasur dibalik menjadi rusak." },
-      { input: "Kodok", output: "Palindrom", explanation: "Setelah diubah ke huruf kecil: kodok, dibalik tetap kodok." },
+      { input: "level", output: "Palindrome", explanation: "level reversed is still level." },
+      { input: "hello", output: "Not Palindrome", explanation: "hello reversed is olleh." },
+      { input: "Racecar", output: "Palindrome", explanation: "In lowercase it is racecar, which reads the same reversed." },
     ],
-    constraints: ["Input berupa satu kata tanpa spasi.", "1 <= panjang kata <= 100"],
+    constraints: ["The input is a single word with no spaces.", "1 <= word length <= 100"],
     starterCode: {
-      python: "kata = input()\n\n# Tulis kode kamu di bawah ini\n",
-      javascript:
-        'const input = require("fs").readFileSync(0, "utf8").split("\\n");\nconst kata = input[0].trim();\n\n// Tulis kode kamu di bawah ini\n',
-      java: javaMain("        Scanner sc = new Scanner(System.in);\n        String kata = sc.nextLine().trim();\n\n        // Tulis kode kamu di bawah ini\n        "),
+      python: "word = input()\n\n# Write your code below\n",
+      javascript: jsInput("word"),
+      java: javaMain("        Scanner sc = new Scanner(System.in);\n        String word = sc.nextLine().trim();\n\n        // Write your code below\n        "),
     },
-    hiddenInputs: ["katak", "Kodok", "makan", "Malam", "coding", "a", "kasur", "Tamat"],
+    hiddenInputs: ["level", "Racecar", "hello", "Madam", "coding", "a", "world", "Kayak"],
     expectedOutput: same(
-      ["Palindrom", "Palindrom", "Bukan Palindrom", "Palindrom", "Bukan Palindrom", "Palindrom", "Bukan Palindrom", "Palindrom"].join("\n")
+      ["Palindrome", "Palindrome", "Not Palindrome", "Palindrome", "Not Palindrome", "Palindrome", "Not Palindrome", "Palindrome"].join("\n")
     ),
   },
 ];
