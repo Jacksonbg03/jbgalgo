@@ -26,6 +26,15 @@ export const useAdminUsers = () => {
   });
 };
 
+// refreshed every 30s so the teacher sees progress live during class
+export const useAssignmentProgress = () => {
+  return useQuery({
+    queryKey: ["assignmentProgress"],
+    queryFn: userApi.getAssignmentProgress,
+    refetchInterval: 30000,
+  });
+};
+
 export const useUserSubmissions = (id) => {
   return useQuery({
     queryKey: ["userSubmissions", id],

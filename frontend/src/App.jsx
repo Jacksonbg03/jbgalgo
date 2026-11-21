@@ -11,6 +11,7 @@ import { useGetUser } from "./hooks/useUsers";
 import UsersPage from "./pages/UsersPage";
 import UserSubmissionsPage from "./pages/UserSubmissionsPage";
 import AssignmentsPage from "./pages/AssignmentsPage";
+import AssignmentProgressPage from "./pages/AssignmentProgressPage";
 
 function App() {
   const { isSignedIn, isLoaded } = useUser();
@@ -31,6 +32,7 @@ function App() {
         <Route path="/problem/:id" element={isSignedIn ? <ProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/problems/add" element={isSignedIn && userz.role === "Admin" ? <AddProblemPage /> : <Navigate to={"/"} />} />
         <Route path="/admin/users" element={isSignedIn && userz.role === "Admin" ? <UsersPage /> : <Navigate to={"/"} />} />
+        <Route path="/admin/progress" element={isSignedIn && userz.role === "Admin" ? <AssignmentProgressPage /> : <Navigate to={"/"} />} />
         <Route path="/admin/users/:id" element={isSignedIn && userz.role === "Admin" ? <UserSubmissionsPage /> : <Navigate to={"/"} />} />
         <Route path="/problems/edit/:id" element={isSignedIn && userz.role === "Admin" ? <AddProblemPage key="edit" /> : <Navigate to={"/"} />} />
       </Routes>

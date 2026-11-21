@@ -6,7 +6,8 @@ import {
   listUsers,
   updateUserByAdmin,
   deleteUserByAdmin,
-  getUserSubmissions
+  getUserSubmissions,
+  getAssignmentProgress
 } from "../controllers/userController.js";
 import { protectRoute } from "../middleware/protectRoute.js";
 
@@ -22,5 +23,7 @@ router.get("/admin/users", protectRoute, listUsers);
 router.get("/admin/users/:id/submissions", protectRoute, getUserSubmissions);
 router.patch("/admin/users/:id", protectRoute, updateUserByAdmin);
 router.delete("/admin/users/:id", protectRoute, deleteUserByAdmin);
+// admin: who finished which assignment
+router.get("/admin/assignments", protectRoute, getAssignmentProgress);
 
 export default router;

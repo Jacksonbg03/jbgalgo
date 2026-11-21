@@ -29,6 +29,10 @@ export const userApi = {
     const response = await axiosInstance.get(`/user/admin/users/${id}/submissions`);
     return response.data;
   },
+  getAssignmentProgress: async () => {
+    const response = await axiosInstance.get("/user/admin/assignments");
+    return response.data.groups;
+  },
   deleteUserByAdmin: async (id) => {
     const response = await axiosInstance.delete(`/user/admin/users/${id}`);
     return response.data;
