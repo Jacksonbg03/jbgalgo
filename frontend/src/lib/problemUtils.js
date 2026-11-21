@@ -20,22 +20,26 @@ export const getDeadlineInfo = (problem, user) => {
 
   return {
     date,
-    label: date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: JAKARTA }),
+    label: date.toLocaleString("en-GB", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: JAKARTA }),
     overdue: date.getTime() < Date.now(),
     levels,
   };
 };
 
-// "YYYY-MM-DD" (Jakarta time) for a date input
-export const toDateInputValue = (raw) => {
-  if (!raw) return "";
-  const date = new Date(raw);
-  if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-CA", { timeZone: JAKARTA, year: "numeric", month: "2-digit", day: "2-digit" }).format(date);
+// "YYYY-MM-DDTHH:MM" (Jakarta time) for a datetime-local input
+export const toDateTimeInputValue = (raw) => {
+  const date = raw ? new Date(raw) : null;
+  if (!date || Number.isNaN(date.getTime())) return "";
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", { timeZone: JAKARTA, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hourCycle: "h23" })
+      .formatToParts(date)
+      .map((p) => [p.type, p.value])
+  );
+  return `${parts.year}-${parts.month}-${parts.day}T${parts.hour}:${parts.minute}`;
 };
 
-// a deadline picked as a date means the end of that day in Jakarta
-export const fromDateInputValue = (value) => (value ? `${value}T23:59:59+07:00` : null);
+// a datetime-local value is Jakarta time
+export const fromDateTimeInputValue = (value) => (value ? `${value}:00+07:00` : null);
 
 // ---------- test cases ----------
 // Inputs are stored with a literal "\n" between lines (that is what the grader expects).
@@ -67,10 +71,11 @@ export const PARAM_TYPES = {
   },
 };
 
+// placeholder return so untouched starter code still compiles and gives Wrong Answer instead of an error
 export const RETURN_TYPES = {
-  int: { label: "Integer", javaType: "int" },
-  decimal: { label: "Decimal", javaType: "double" },
-  text: { label: "Text", javaType: "String" },
+  int: { label: "Integer", javaType: "int", javaPlaceholder: "return 0;" },
+  decimal: { label: "Decimal", javaType: "double", javaPlaceholder: "return 0.0;" },
+  text: { label: "Text", javaType: "String", javaPlaceholder: 'return "";' },
 };
 
 export const toSnakeCase = (name) =>
@@ -108,6 +113,7 @@ export const generateStarterCode = ({ functionName, params, returnType }) => {
   const python = [
     `def ${py}(${pyParams.join(", ")}):`,
     "    # --- YOUR CODE HERE ---",
+    "    pass",
     "",
     "# --- INPUT SECTION ---",
     ...params.map((p, i) => `${pyParams[i]} = ${PARAM_TYPES[p.type].py()}`),
@@ -122,6 +128,7 @@ export const generateStarterCode = ({ functionName, params, returnType }) => {
     "public class Main {",
     `    public static ${RETURN_TYPES[returnType].javaType} ${camel}(${params.map((p, i) => `${PARAM_TYPES[p.type].javaType} ${camelParams[i]}`).join(", ")}) {`,
     "        // --- YOUR CODE HERE ---",
+    `        ${RETURN_TYPES[returnType].javaPlaceholder}`,
     "    }",
     "",
     "    public static void main(String[] args) {",
@@ -153,9 +160,6 @@ export const formatDateTimeEN = (raw) => {
   });
 };
 
-// "Saturday, 21 Nov 2026" (Jakarta time)
-export const formatDateEN = (raw) =>
-  new Date(raw).toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "short", year: "numeric", timeZone: JAKARTA });
 
 // "3 days left" / "5 hours left" / "20 minutes left"
 export const timeLeftLabel = (date, now = Date.now()) => {
@@ -181,13 +185,13 @@ export const assignmentStatus = (problem, deadline) => {
   return deadline.getTime() < Date.now() ? "missed" : "pending";
 };
 
-/** Problems with a deadline for this user, grouped per deadline day, upcoming groups first. */
+/** Problems with a deadline for this user, grouped per deadline (date and time), upcoming groups first. */
 export const getAssignmentGroups = (problems, user) => {
   const groups = new Map();
   for (const problem of problems || []) {
     const info = getDeadlineInfo(problem, user);
     if (!info) continue;
-    const key = toDateInputValue(info.date);
+    const key = info.date.toISOString();
     if (!groups.has(key)) groups.set(key, { key, deadline: info.date, overdue: info.overdue, items: [] });
     groups.get(key).items.push({ problem, status: assignmentStatus(problem, info.date) });
   }

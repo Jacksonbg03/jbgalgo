@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import Navbar from "../components/Navbar";
 
@@ -13,6 +13,9 @@ import confetti from "canvas-confetti";
 import { useProblemById, useSubmitProblem, useSolvedProblem } from "../hooks/useProblems";
 import { Loader2Icon } from "lucide-react";
 import { useGetUser } from "../hooks/useUsers";
+
+// output panel height (% of the editor column) once code has been run
+const OUTPUT_SIZE_AFTER_RUN = 45;
 
 function ProblemPage() {
   const { id } = useParams();
@@ -31,6 +34,8 @@ function ProblemPage() {
   const [error, setError] = useState(null);
   const [isRunning, setIsRunning] = useState(false);
   const [solved, setSolved] = useState(false);
+  const desktopOutputRef = useRef(null);
+  const mobileOutputRef = useRef(null);
 
   const { data: problemsData, isLoadingProblemsData} = useSolvedProblem(user.id);
   const { data: problemId, isLoadingProblem, isError: problemNotFound } = useProblemById(id);
@@ -105,6 +110,10 @@ function ProblemPage() {
     setOutputArr([])
     setIsCorrect(null);
     setError(null);
+    // make room for the result so it shows without scrolling
+    for (const panel of [desktopOutputRef.current, mobileOutputRef.current]) {
+      if (panel && panel.getSize() < OUTPUT_SIZE_AFTER_RUN) panel.resize(OUTPUT_SIZE_AFTER_RUN);
+    }
 
     try {
       const result = await submitProblemMutation.mutateAsync({
@@ -196,12 +205,13 @@ function ProblemPage() {
 
                 <PanelResizeHandle className="h-1.5 md:h-2 bg-primary md:bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
-                <Panel defaultSize={30} minSize={20}>
+                <Panel ref={mobileOutputRef} defaultSize={30} minSize={20}>
                   <OutputPanel
                     output={outputArr}
                     error={error}
                     isCorrect={isCorrect}
                     solved={solved}
+                    isRunning={isRunning}
                     handleProblemChange={handleProblemChange}
                     nextProb={nextProb}
                   />
@@ -242,12 +252,13 @@ function ProblemPage() {
 
                 <PanelResizeHandle className="h-2 bg-base-300 hover:bg-primary transition-colors cursor-row-resize" />
 
-                <Panel defaultSize={30} minSize={20}>
+                <Panel ref={desktopOutputRef} defaultSize={30} minSize={20}>
                   <OutputPanel
                     output={outputArr}
                     error={error}
                     isCorrect={isCorrect}
                     solved={solved}
+                    isRunning={isRunning}
                     handleProblemChange={handleProblemChange}
                     nextProb={nextProb}
                   />

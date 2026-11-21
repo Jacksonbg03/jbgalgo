@@ -2,7 +2,7 @@
 // Usage (from the backend folder): npm run seed -- --set sesi1 --level SMP --deadline 2026-10-04
 // --set: which problem set to seed (default sesi1, see problems/index.js).
 // --level (SMP/SMA) optional; defaults to the set's LEVEL if it has one, otherwise the problems are for every level.
-// --deadline (YYYY-MM-DD) optional, meaning the end of that day in Jakarta time; without it there is no deadline.
+// --deadline optional, Jakarta time: "YYYY-MM-DD HH:MM", or YYYY-MM-DD for the end of that day; without it there is no deadline.
 import mongoose from "mongoose";
 import Problem from "./src/models/Problems.js";
 import { ENV } from "./src/lib/env.js";
@@ -26,12 +26,15 @@ const seed = async () => {
     console.error("--level must be SMP or SMA");
     process.exit(1);
   }
-  if (deadlineArg && !/^\d{4}-\d{2}-\d{2}$/.test(deadlineArg)) {
-    console.error("--deadline must be YYYY-MM-DD");
+  const deadlineMatch = deadlineArg && deadlineArg.match(/^(\d{4}-\d{2}-\d{2})(?:[T ](\d{2}:\d{2}))?$/);
+  if (deadlineArg && !deadlineMatch) {
+    console.error('--deadline must be YYYY-MM-DD or "YYYY-MM-DD HH:MM"');
     process.exit(1);
   }
-  // same as the web form: the deadline is the end of that day in Jakarta time
-  const deadline = deadlineArg ? `${deadlineArg}T23:59:59+07:00` : undefined;
+  // Jakarta time; a date without a time means the end of that day (same as the web form)
+  const deadline = deadlineMatch
+    ? `${deadlineMatch[1]}T${deadlineMatch[2] ? `${deadlineMatch[2]}:00` : "23:59:59"}+07:00`
+    : undefined;
   if (!ENV.DB_URL) {
     console.error("DB_URL is not set in backend/.env");
     process.exit(1);

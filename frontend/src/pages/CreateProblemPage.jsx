@@ -7,12 +7,12 @@ import { useAddProblem, useProblemForEdit, useProblems, useUpdateProblem } from 
 import {
   PARAM_TYPES,
   RETURN_TYPES,
-  fromDateInputValue,
+  fromDateTimeInputValue,
   fromStoredInput,
   generateStarterCode,
   isValidIdentifier,
   problemLevels,
-  toDateInputValue,
+  toDateTimeInputValue,
   toSnakeCase,
   toStoredInput,
 } from "../lib/problemUtils";
@@ -313,7 +313,7 @@ export const AddProblemPage = () => {
       title: p.title || "",
       difficulty: p.difficulty || "Easy",
       level: problemLevels(p)[0] || "",
-      deadline: toDateInputValue([].concat(p.deadline || [])[0]),
+      deadline: toDateTimeInputValue([].concat(p.deadline || [])[0]),
       categories: [].concat(p.category || []).filter(Boolean),
       hidden: !!p.hidden,
       descriptionText: p.description?.text || "",
@@ -349,7 +349,7 @@ export const AddProblemPage = () => {
     }
 
     const expectedFor = (lang) => gradedRows.map((r) => r.expected[lang].trim()).join("\n");
-    const deadline = fromDateInputValue(form.deadline);
+    const deadline = fromDateTimeInputValue(form.deadline);
     const payload = {
       problemId: isEdit ? form.problemId : slugify(form.title),
       title: form.title.trim(),
@@ -430,9 +430,9 @@ export const AddProblemPage = () => {
           </div>
 
           <div className="grid md:grid-cols-2 gap-4">
-            <Field label="Deadline (optional)" hint="Ends at 23:59 WIB on this day.">
+            <Field label="Deadline (optional)" hint="Date and time, WIB (Jakarta time).">
               <div className="flex gap-2">
-                <input type="date" value={form.deadline} onChange={(e) => setField({ deadline: e.target.value })} className="input bg-base-300 w-full" />
+                <input type="datetime-local" value={form.deadline} onChange={(e) => setField({ deadline: e.target.value })} className="input bg-base-300 w-full" />
                 {form.deadline && (
                   <button type="button" onClick={() => setField({ deadline: "" })} className="btn btn-ghost" aria-label="Clear deadline">
                     <XIcon className="size-4" />
@@ -618,7 +618,7 @@ export const AddProblemPage = () => {
             ) : (
               <p className="text-sm text-base-content/60 flex-1">
                 {gradedRows.length} test case{gradedRows.length === 1 ? "" : "s"} · {form.level || "All levels"}
-                {form.deadline ? ` · deadline ${form.deadline}` : ""}
+                {form.deadline ? ` · deadline ${form.deadline.replace("T", " ")} WIB` : ""}
                 {form.hidden ? " · hidden" : ""}
               </p>
             )}

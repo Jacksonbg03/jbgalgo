@@ -1,6 +1,6 @@
 import { Link } from "react-router";
 import { ArrowRightIcon, CheckCircle2Icon, ClipboardListIcon, FlameIcon, TargetIcon } from "lucide-react";
-import { formatDateEN, timeLeftLabel } from "../lib/problemUtils";
+import { formatDateTimeEN, timeLeftLabel } from "../lib/problemUtils";
 import { getDifficultyBadgeClass } from "../lib/utils";
 
 // Dashboard summary: the nearest open deadline, its progress and what is left to do.
@@ -39,7 +39,7 @@ function AssignmentsCard({ groups, totalSolved, isLoading }) {
               <div>
                 <div className="flex flex-wrap justify-between gap-2 text-sm mb-1">
                   <span className="font-medium">
-                    Due {formatDateEN(next.deadline)} · <span className="text-red-400">{timeLeftLabel(next.deadline)}</span>
+                    Due {formatDateTimeEN(next.deadline)} · <span className="text-red-400">{timeLeftLabel(next.deadline)}</span>
                   </span>
                   <span className="text-base-content/60">
                     {next.solved}/{next.items.length} done

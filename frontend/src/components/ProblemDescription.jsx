@@ -1,115 +1,97 @@
+import { CheckCircle2Icon } from "lucide-react";
 import { getDifficultyBadgeClass } from "../lib/utils";
 import DeadlineBadge from "./DeadlineBadge";
-function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved, user }) {
-  return (
-    <div className="h-full overflow-y-auto bg-base-200">
-      {/* HEADER SECTION */}
-      <div className="p-6 bg-base-100 border-b border-base-300">
-        <DeadlineBadge problem={problem} user={user} />
-        <div className="flex items-center justify-between mb-3 mt-1">
-          <div className="flex gap-3 items-center">
-            <h1 className="text-3xl font-bold text-base-content">{problem.title}</h1>
-            { solved === true ?
-              (
-                <span className="badge bg-green-500/20 text-green-400 border border-green-500/30">Solved</span>
-              ) : ""
-            }
-          </div>
-            <span className={`badge ${getDifficultyBadgeClass(problem.difficulty)}`}>
-              {problem.difficulty}
-            </span>
-        </div>
-        <p className="text-base-content/60">{problem.category.join(" | ")}</p>
 
-        {/* Problem selector */}
-        <div className="mt-4">
-          <select
-            className="select select-sm w-full"
-            value={currentProblemId}
-            onChange={(e) => onProblemChange(e.target.value)}
-          >
-            {
-            allProblems && allProblems.length ? allProblems.map((p) => (
-                <option key={p.problemId} value={p.problemId}>
-                  {p.title} - {p.difficulty}
-                </option>
-              )) : ""
-            }
-          </select>
+// example inputs/outputs store line breaks as a literal "\n"
+const Lines = ({ text }) => (
+  <pre className="font-mono text-sm whitespace-pre-wrap break-words">{(text || "").split("\\n").join("\n")}</pre>
+);
+
+function ProblemDescription({ problem, currentProblemId, onProblemChange, allProblems, solved, user }) {
+  const notes = problem.description.notes || [];
+
+  return (
+    <div className="h-full flex flex-col bg-base-200">
+      {/* HEADER: stays visible while the description scrolls */}
+      <div className="px-5 py-4 bg-base-100 border-b border-base-300 space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h1 className="text-2xl font-bold text-base-content">{problem.title}</h1>
+              <span className={`badge badge-sm ${getDifficultyBadgeClass(problem.difficulty)}`}>{problem.difficulty}</span>
+              {solved === true && (
+                <span className="badge badge-sm gap-1 bg-green-500/20 text-green-400 border border-green-500/30">
+                  <CheckCircle2Icon className="size-3" /> Solved
+                </span>
+              )}
+            </div>
+            <p className="text-sm text-base-content/60">{problem.category.join(" · ")}</p>
+          </div>
+          <DeadlineBadge problem={problem} user={user} />
         </div>
+
+        <select
+          className="select select-sm w-full"
+          value={currentProblemId}
+          onChange={(e) => onProblemChange(e.target.value)}
+          aria-label="Choose a problem"
+        >
+          {(allProblems || []).map((p) => (
+            <option key={p.problemId} value={p.problemId}>
+              {p.title} - {p.difficulty}
+            </option>
+          ))}
+        </select>
       </div>
 
-      <div className="p-6 space-y-6">
-        {/* PROBLEM DESC */}
-        <div className="bg-base-100 rounded-xl shadow-sm p-5 border border-base-300">
-          <h2 className="text-xl font-bold text-base-content">Description</h2>
+      {/* BODY */}
+      <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
+        <section className="space-y-2 leading-relaxed">
+          <p className="text-base-content/90">{problem.description.text || ""}</p>
+          {notes.length > 0 && (
+            <ul className="list-disc pl-5 space-y-1 text-base-content/80 text-[15px]">
+              {notes.map((note, idx) => (
+                <li key={idx}>{note}</li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-          <div className="space-y-3 text-base leading-relaxed">
-            <p className="text-base-content/90">{problem.description.text || ""}</p>
-            {problem.description.notes.map((note, idx) => (
-              <p key={idx} className="text-base-content/90">
-                {note}
-              </p>
-            ))}
-          </div>
-        </div>
-
-        {/* EXAMPLES SECTION */}
-        <div className="bg-base-100 rounded-xl shadow-sm p-5 border border-base-300">
-          <h2 className="text-xl font-bold mb-4 text-base-content">Examples</h2>
-          <div className="space-y-4">
+        {problem.examples?.length > 0 && (
+          <section className="space-y-2">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-base-content/60">Examples</h2>
             {problem.examples.map((example, idx) => (
-              <div key={idx}>
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="badge badge-sm">{idx + 1}</span>
-                  <p className="font-semibold text-base-content">Example {idx + 1}</p>
-                </div>
-                <div className="bg-base-200 rounded-lg p-4 font-mono text-sm space-y-1.5">
-                  <div className="flex gap-2">
-                    <span className="text-primary font-bold min-w-[70px]">Input:</span>
-                    <span>{example.input.split('\\n').map((line, i) => (
-                      <span key={i}>
-                        {line}
-                        <br />
-                      </span>
-                      ))}
-                    </span>
+              <div key={idx} className="rounded-lg bg-base-100 border border-base-300 overflow-hidden">
+                <div className="grid grid-cols-2 divide-x divide-base-300">
+                  <div className="p-3 min-w-0">
+                    <p className="text-xs font-semibold text-primary mb-1">Input</p>
+                    <Lines text={example.input} />
                   </div>
-                  <div className="flex gap-2">
-                    <span className="text-secondary font-bold min-w-[70px]">Output:</span>
-                    <span>{example.output.split('\\n').map((line, i) => (
-                      <span key={i}>
-                        {line}
-                        <br />
-                      </span>
-                      ))}
-                      </span>
+                  <div className="p-3 min-w-0">
+                    <p className="text-xs font-semibold text-secondary mb-1">Output</p>
+                    <Lines text={example.output} />
                   </div>
-                  {example.explanation && (
-                    <div className="pt-2 border-t border-base-300 mt-2">
-                      <span className="text-base-content/60 font-sans text-xs">
-                        <span className="font-semibold">Explanation:</span> {example.explanation}
-                      </span>
-                    </div>
-                  )}
                 </div>
+                {example.explanation && (
+                  <p className="px-3 py-2 border-t border-base-300 text-xs text-base-content/60">{example.explanation}</p>
+                )}
               </div>
             ))}
-          </div>
-        </div>
+          </section>
+        )}
 
-        {/* CONSTRAINTS */}
-        <div className="bg-base-100 rounded-xl shadow-sm p-5 border border-base-300">
-          <h2 className="text-xl font-bold mb-4 text-base-content">Constraints</h2>
-          <ul className="space-y-2 text-base-content/90">
-            {problem.constraints.map((constraint, idx) => (
-              <li key={idx} className="flex gap-2">
-                <span className="text-primary">•</span>
-                <code className="text-sm">{constraint}</code>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {problem.constraints?.length > 0 && (
+          <section className="space-y-1">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-base-content/60">Constraints</h2>
+            <ul className="space-y-1">
+              {problem.constraints.map((constraint, idx) => (
+                <li key={idx}>
+                  <code className="text-sm text-base-content/80">{constraint}</code>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </div>
     </div>
   );

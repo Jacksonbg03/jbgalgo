@@ -5,7 +5,7 @@ import { CalendarClockIcon, ClipboardListIcon, CheckCircle2Icon, ChevronDownIcon
 import Navbar from "../components/Navbar";
 import { useSolvedProblem } from "../hooks/useProblems";
 import { useGetUser } from "../hooks/useUsers";
-import { formatDateEN, formatDateTimeEN, getAssignmentGroups, timeLeftLabel } from "../lib/problemUtils";
+import { formatDateTimeEN, getAssignmentGroups, timeLeftLabel } from "../lib/problemUtils";
 import { getDifficultyBadgeClass } from "../lib/utils";
 
 const STATUS = {
@@ -58,7 +58,7 @@ function AssignmentGroup({ group }) {
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-base-content/50">Deadline</p>
-              <p className="font-bold text-lg">{formatDateEN(group.deadline)}, 23:59</p>
+              <p className="font-bold text-lg">{formatDateTimeEN(group.deadline)}</p>
             </div>
           </div>
           {group.overdue ? (
