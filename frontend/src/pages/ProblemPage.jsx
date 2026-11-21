@@ -52,21 +52,22 @@ function ProblemPage() {
 
   const nextProb = resProb && resProb.length ? (resProb[1] ? resProb[1].problemId : []) : [];
 
+  // SMA classes learn JavaScript (p5.js), SMP classes Python
+  const defaultLanguage = userz.level === "SMA" ? "javascript" : "python";
+
   // fetch problem from backend
   useEffect(() => {
     if (problem) {
       setCurrentProblemId(problem);
-      if (problem?.saveLanguageUser){
-        setSelectedLanguage(problem.saveLanguageUser);
-      }else{
-        setSelectedLanguage("python");
-      }
+      // a student's saved code opens in the language they wrote it in
+      const language = problem?.saveLanguageUser || (problem.starterCode?.[defaultLanguage] ? defaultLanguage : "python");
+      setSelectedLanguage(language);
 
       if (problem?.saveSourceCode){
         setCode(problem.saveSourceCode);
       }
       else{
-        setCode(problem.starterCode.python);
+        setCode(problem.starterCode[language]);
       }
 
       setOutputArr([])
@@ -75,7 +76,7 @@ function ProblemPage() {
       setError(null);
       setSolved(problem.solved || null);
     }
-  }, [problem]);
+  }, [problem, defaultLanguage]);
 
   const handleLanguageChange = (e) => {
     const newLang = e.target.value;
