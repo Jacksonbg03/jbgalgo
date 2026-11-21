@@ -19,16 +19,34 @@ chmod 600 "$TOKEN_FILE"
 TOKEN="$(cat "$TOKEN_FILE")"
 RUNTIMES="python:3.12.0 node:20.11.1 java:15.0.2"
 
+# A new VPS runs automatic system updates right after boot, which locks apt for a while.
+wait_for_apt() {
+  for _ in $(seq 1 360); do
+    pgrep -f "^/usr/bin/python3 /usr/bin/unattended-upgrade$|apt-get |^/usr/bin/dpkg " >/dev/null || return 0
+    echo "  waiting for automatic system updates to finish..."
+    sleep 10
+  done
+  echo "apt is still locked after 60 minutes" >&2
+  exit 1
+}
+
 echo "== 1/5 Docker"
-command -v docker >/dev/null || curl -fsSL https://get.docker.com | sh
+if ! command -v docker >/dev/null; then
+  wait_for_apt
+  curl -fsSL https://get.docker.com | sh
+fi
 
 echo "== 2/5 Piston"
 docker rm -f piston >/dev/null 2>&1 || true
-# only reachable from this machine (127.0.0.1); Caddy is the public entry point
+# only reachable from this machine (127.0.0.1); Caddy is the public entry point.
+# CPU time: Java compiles and starts a JVM inside the run stage, which does not fit in Piston's default 3s.
 docker run -d --name piston --privileged --restart unless-stopped \
   -v piston_packages:/piston/packages \
   -e PISTON_RUN_TIMEOUT=10000 \
   -e PISTON_COMPILE_TIMEOUT=10000 \
+  -e PISTON_RUN_CPU_TIME=10000 \
+  -e PISTON_COMPILE_CPU_TIME=10000 \
+  -e PISTON_MAX_CONCURRENT_JOBS=6 \
   -e PISTON_OUTPUT_MAX_SIZE=200000 \
   -p 127.0.0.1:2000:2000 \
   ghcr.io/engineer-man/piston >/dev/null
@@ -42,7 +60,7 @@ echo "== 3/5 Languages ($RUNTIMES)"
 for runtime in $RUNTIMES; do
   language="${runtime%%:*}"
   version="${runtime##*:}"
-  if curl -fs http://127.0.0.1:2000/api/v2/runtimes | grep -q "\"language\":\"$language\",\"version\":\"$version\""; then
+  if curl -fs http://127.0.0.1:2000/api/v2/packages | grep -q "\"language\":\"$language\",\"language_version\":\"$version\",\"installed\":true"; then
     echo "  $language $version already installed"
   else
     echo "  installing $language $version ..."
@@ -54,6 +72,7 @@ done
 
 echo "== 4/5 Caddy (HTTPS for $DOMAIN)"
 if ! command -v caddy >/dev/null; then
+  wait_for_apt
   apt-get update -qq
   apt-get install -y -qq debian-keyring debian-archive-keyring apt-transport-https curl gnupg >/dev/null
   curl -1sLf 'https://dl.cloudsmith.io/public/caddy/stable/gpg.key' | gpg --dearmor --yes -o /usr/share/keyrings/caddy-stable-archive-keyring.gpg

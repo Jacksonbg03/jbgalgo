@@ -2,9 +2,9 @@
 // Uses our own Piston server (PISTON_URL) when it is set, and Wandbox (https://wandbox.org, free, no key) otherwise
 // or when Piston is unreachable. The public Piston API (emkc.org) is whitelist-only since Feb 2025.
 //
-// To keep the number of requests low, all test cases of a Python or JavaScript submission run in ONE execution:
+// To keep the number of requests low, all test cases of a submission run in ONE execution:
 // the student's code is wrapped in a small harness that runs it once per input and reports every output.
-// Java runs once per test case.
+// Java is batched only on Piston (one compile + one JVM); on Wandbox it runs once per test case.
 import { ENV } from "./env.js";
 
 const WANDBOX_API = "https://wandbox.org/api/compile.json";
@@ -23,6 +23,9 @@ const PISTON = {
   token: ENV.PISTON_TOKEN || "",
   runTimeoutMs: Number(ENV.PISTON_RUN_TIMEOUT_MS) || 10000,
   files: { javascript: "main.js", python: "main.py", java: "Main.java" },
+  // the Python/JS harness gets its own name so tracebacks of the student code ("main.*") point at the student code;
+  // the Java harness shares the student's file, so it keeps Main.java
+  harnessFiles: { javascript: "runner.js", python: "runner.py", java: "Main.java" },
 };
 
 // ---------- concurrency ----------
@@ -100,7 +103,7 @@ async function runOnWandbox(language, code, stdin) {
 }
 
 // ---------- Piston (our VPS) ----------
-async function runOnPiston(language, code, stdin) {
+async function runOnPiston(language, code, stdin, fileName = PISTON.files[language]) {
   try {
     const headers = PISTON.token ? { Authorization: `Bearer ${PISTON.token}` } : {};
     const response = await postJson(
@@ -108,7 +111,7 @@ async function runOnPiston(language, code, stdin) {
       {
         language,
         version: "*",
-        files: [{ name: PISTON.files[language], content: code }],
+        files: [{ name: fileName, content: code }],
         stdin,
         compile_timeout: PISTON.runTimeoutMs,
         run_timeout: PISTON.runTimeoutMs,
@@ -123,6 +126,13 @@ async function runOnPiston(language, code, stdin) {
     }
 
     const data = await response.json();
+    // Piston's Java runtime reports the file as "Main.java.java"
+    if (language === "java") {
+      for (const stage of [data.compile, data.run]) {
+        if (!stage) continue;
+        for (const key of ["stderr", "output"]) if (stage[key]) stage[key] = stage[key].replace(/\.java\.java\b/g, ".java");
+      }
+    }
     const compile = data.compile;
     if (compile && compile.code !== 0) {
       return { result: { success: false, error: compile.stderr || compile.output || "Compilation failed" } };
@@ -145,9 +155,9 @@ async function runOnPiston(language, code, stdin) {
 }
 
 // Piston first when configured; Wandbox when it is not, or when Piston fails as a runner.
-async function execute(language, code, stdin) {
+async function execute(language, code, stdin, fileName) {
   if (PISTON.url) {
-    const attempt = await pistonSlot(() => runOnPiston(language, code, stdin));
+    const attempt = await pistonSlot(() => runOnPiston(language, code, stdin, fileName));
     if (!attempt.transient) return attempt.result;
     console.warn(`Piston unavailable, falling back to Wandbox: ${attempt.result.error}`);
   }
@@ -182,11 +192,15 @@ export async function runCode(language, code, stdin = "") {
 const UNBATCHABLE = {
   python: /stdin\.buffer|os\._exit|subprocess|multiprocessing|threading|asyncio|signal/,
   javascript: /process\.(stdin|exit)|readline|setTimeout|setInterval|setImmediate|\bawait\b|Promise|\.then\(|child_process|worker_threads/,
+  // a static Scanner/reader would keep reading the first test's input; exit/threads/packages break the harness
+  java: /System\.exit|\bpackage\s+[\w.]+\s*;|static\s+[^;(=]*\b(Scanner|BufferedReader|InputStreamReader|StreamTokenizer)\b|\bThread\b|Runtime\.getRuntime/,
 };
 
-const pythonHarness = (code, inputs) => `import sys, io, json, traceback, contextlib
+const pythonHarness = (code, inputs) => `import sys, io, json, traceback, contextlib, linecache
 CODE = ${JSON.stringify(code)}
 INPUTS = ${JSON.stringify(inputs)}
+# so tracebacks can show the student's source lines for "main.py"
+linecache.cache["main.py"] = (len(CODE), None, CODE.splitlines(True), "main.py")
 real_stdout = sys.stdout
 results = []
 try:
@@ -218,7 +232,7 @@ const INPUTS = ${JSON.stringify(inputs)};
 const realOut = process.stdout.write.bind(process.stdout);
 const realErr = process.stderr.write.bind(process.stderr);
 // keep only the student's frames in a stack trace
-const clean = (stack) => String(stack).split("\\n").filter((line) => !/^\\s+at /.test(line) || line.includes("main.js")).join("\\n");
+const clean = (stack) => String(stack).split("\\n").filter((line) => !/^\\s+at /.test(line) || /[( ]main\\.js:\\d/.test(line)).join("\\n");
 const results = [];
 let fn = null;
 try {
@@ -252,6 +266,80 @@ if (fn) {
 realOut("\\n${RESULTS_MARKER}" + JSON.stringify(results) + "\\n");
 `;
 
+// Java: a JbgRunner class placed before the student's code calls the student's main() once per input in the same JVM.
+// The student's imports move into line 1 together with the runner (their own lines become empty),
+// so line numbers in compile errors and stack traces still match the student's code.
+// Java's source-file mode runs the first class in the file, which is the runner.
+const javaRunner = (mainClass, inputs) =>
+  String.raw`class JbgRunner {
+    public static void main(String[] args) throws Exception {
+      String[] inputs = new String[]{${inputs.map((input) => JSON.stringify(input)).join(", ")}};
+      java.io.PrintStream realOut = System.out;
+      java.io.PrintStream realErr = System.err;
+      StringBuilder json = new StringBuilder("[");
+      for (int i = 0; i < inputs.length; i++) {
+        java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
+        java.io.ByteArrayOutputStream err = new java.io.ByteArrayOutputStream();
+        System.setIn(new java.io.ByteArrayInputStream(inputs[i].getBytes("UTF-8")));
+        System.setOut(new java.io.PrintStream(out, true, "UTF-8"));
+        System.setErr(new java.io.PrintStream(err, true, "UTF-8"));
+        try {
+          Class.forName("${mainClass}").getMethod("main", String[].class).invoke(null, (Object) new String[0]);
+        } catch (java.lang.reflect.InvocationTargetException e) {
+          Throwable c = e.getCause();
+          System.err.println("Exception in thread \"main\" " + c);
+          for (StackTraceElement f : c.getStackTrace()) {
+            String cls = f.getClassName();
+            String fn = f.getFileName(); if (fn != null && fn.startsWith("Main.java") && !cls.startsWith("JbgRunner") && !cls.startsWith("com.sun.") && !cls.startsWith("java.") && !cls.startsWith("jdk.") && !cls.startsWith("sun.")) {
+              System.err.println("\tat " + f.getClassName() + "." + f.getMethodName() + "(Main.java:" + f.getLineNumber() + ")");
+            }
+          }
+        }
+        System.out.flush();
+        System.err.flush();
+        System.setOut(realOut);
+        System.setErr(realErr);
+        String o = out.toString("UTF-8");
+        String e = err.toString("UTF-8");
+        json.append(i == 0 ? "" : ",").append("{\"out\":").append(q(o)).append(",\"err\":").append(q(e)).append("}");
+        if (!e.isEmpty()) break;
+      }
+      realOut.print("\n${RESULTS_MARKER}" + json.append("]") + "\n");
+      realOut.flush();
+    }
+    static String q(String s) {
+      StringBuilder b = new StringBuilder("\"");
+      for (char ch : s.toCharArray()) {
+        if (ch == '"' || ch == '\\') b.append('\\').append(ch);
+        else if (ch < 0x20) b.append(String.format("\\u%04x", (int) ch));
+        else b.append(ch);
+      }
+      return b.append('"').toString();
+    }
+  }`
+    .split("\n")
+    .map((line) => line.trim())
+    .join(" ");
+
+function javaHarness(code, inputs) {
+  const mainAt = code.search(/static\s+void\s+main\s*\(/);
+  if (mainAt === -1) return null;
+  // the class that declares main is the last class opened before it
+  const mainClass = [...code.slice(0, mainAt).matchAll(/\bclass\s+([A-Za-z_]\w*)/g)].at(-1)?.[1];
+  if (!mainClass) return null;
+
+  const imports = [];
+  const lines = code.split("\n").map((line) => {
+    if (/^\s*import\s+[\w.*\s]+;\s*$/.test(line)) {
+      imports.push(line.trim());
+      return "";
+    }
+    return line;
+  });
+  lines[0] = `${imports.join(" ")} ${javaRunner(mainClass, inputs)} ${lines[0]}`;
+  return lines.join("\n");
+}
+
 const HARNESS = { python: pythonHarness, javascript: javascriptHarness };
 
 /**
@@ -262,10 +350,22 @@ export async function runTests(language, code, inputs) {
   const invalid = validate(language, code);
   if (invalid) return [{ success: false, error: invalid }];
 
-  const canBatch = HARNESS[language] && !UNBATCHABLE[language].test(code) && inputs.length > 1;
-  if (!canBatch) return Promise.all(inputs.map((input) => execute(language, code, input)));
+  const perTest = () => Promise.all(inputs.map((input) => execute(language, code, input)));
+  if (inputs.length < 2 || UNBATCHABLE[language].test(code)) return perTest();
 
-  const result = await execute(language, HARNESS[language](code, inputs), "");
+  if (language === "java") {
+    // Wandbox compiles and launches Java its own way, so the Java harness only runs on Piston
+    const harness = PISTON.url && javaHarness(code, inputs);
+    if (!harness) return perTest();
+    const attempt = await pistonSlot(() => runOnPiston("java", harness, "", PISTON.harnessFiles.java));
+    if (attempt.transient) return perTest();
+    return parseBatch(attempt.result);
+  }
+
+  return parseBatch(await execute(language, HARNESS[language](code, inputs), "", PISTON.harnessFiles[language]));
+}
+
+function parseBatch(result) {
   const at = (result.output || "").lastIndexOf(RESULTS_MARKER);
   if (at === -1) {
     // the whole run failed (time limit, runner error): report it once
