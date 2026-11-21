@@ -17,12 +17,14 @@ const STATUS = {
   error: { icon: BugIcon, label: "Error", className: "text-error", hint: "The message usually includes the line number." },
 };
 
-function OutputPanel({ output, error, isCorrect, solved, isRunning, handleProblemChange, nextProb }) {
+function OutputPanel({ output, tests, total, error, isCorrect, solved, isRunning, handleProblemChange, nextProb }) {
   const outputs = output || [];
-  const [selected, setSelected] = useState(0);
-
-  // a new run starts at the first test case
-  useEffect(() => setSelected(0), [output]);
+  const testResults = tests || [];
+  const passedCount = testResults.filter(Boolean).length;
+  // a run opens the first failing test case (or the first one when everything passed)
+  const firstFailing = () => Math.max(0, testResults.findIndex((ok) => !ok));
+  const [selected, setSelected] = useState(firstFailing);
+  useEffect(() => setSelected(firstFailing()), [output, tests]); // eslint-disable-line react-hooks/exhaustive-deps
 
   let status = null;
   if (error) status = isServerBusy(error) ? "busy" : "error";
@@ -44,6 +46,11 @@ function OutputPanel({ output, error, isCorrect, solved, isRunning, handleProble
           s && (
             <span className={`flex items-center gap-1.5 text-sm font-semibold ${s.className}`}>
               <Icon className="size-4" /> {s.label}
+              {total > 0 && (status === "accepted" || status === "wrong") && (
+                <span className="font-normal text-base-content/70">
+                  · {passedCount}/{total} test{total === 1 ? "" : "s"} passed
+                </span>
+              )}
             </span>
           )
         )}
@@ -61,6 +68,14 @@ function OutputPanel({ output, error, isCorrect, solved, isRunning, handleProble
 
         {s && !isRunning && <p className="text-sm text-base-content/60">{s.hint}</p>}
 
+        {!isRunning && status === "error" && total > 1 && (
+          <p className="text-sm text-base-content/60">
+            {testResults.length === 0
+              ? `The error happened on test 1 of ${total}.`
+              : `${testResults.length === 1 ? "Test 1" : `Tests 1-${testResults.length}`} ran fine; the error happened on test ${testResults.length + 1} of ${total}.`}
+          </p>
+        )}
+
         {!isRunning && status === "error" && (
           <pre className="text-sm font-mono bg-base-200 rounded-md p-3 whitespace-pre-wrap break-words">{error}</pre>
         )}
@@ -69,21 +84,36 @@ function OutputPanel({ output, error, isCorrect, solved, isRunning, handleProble
           <>
             {outputs.length > 1 && (
               <div className="flex flex-wrap gap-1.5" role="tablist" aria-label="Test cases">
-                {outputs.map((_, i) => (
-                  <button
-                    key={i}
-                    role="tab"
-                    aria-selected={selected === i}
-                    onClick={() => setSelected(i)}
-                    className={`btn btn-xs ${selected === i ? "btn-primary" : "btn-ghost bg-base-200"}`}
-                  >
-                    Test {i + 1}
-                  </button>
-                ))}
+                {outputs.map((_, i) => {
+                  const ok = testResults[i];
+                  const known = ok !== undefined;
+                  const color = !known ? "" : ok ? "btn-success" : "btn-error";
+                  return (
+                    <button
+                      key={i}
+                      role="tab"
+                      aria-selected={selected === i}
+                      aria-label={`Test ${i + 1}${known ? (ok ? ", passed" : ", failed") : ""}`}
+                      onClick={() => setSelected(i)}
+                      className={`btn btn-xs gap-1 ${color} ${selected === i ? "" : "btn-outline"} ${!known && selected === i ? "btn-primary" : ""}`}
+                    >
+                      {known && (ok ? <CheckCircle2Icon className="size-3" /> : <XCircleIcon className="size-3" />)}
+                      Test {i + 1}
+                    </button>
+                  );
+                })}
               </div>
             )}
             <div>
-              <p className="text-xs text-base-content/60 mb-1">Your output{outputs.length > 1 ? ` (test ${selected + 1})` : ""}</p>
+              <p className="text-xs text-base-content/60 mb-1">
+                {outputs.length > 1 ? `Test ${selected + 1}` : "Test"}
+                {testResults[selected] !== undefined && (
+                  <span className={testResults[selected] ? "text-success" : "text-error"}>
+                    {testResults[selected] ? " · passed" : " · failed, this output is not what was expected"}
+                  </span>
+                )}
+                {" · your output:"}
+              </p>
               <pre className="text-sm font-mono bg-base-200 rounded-md p-3 whitespace-pre-wrap break-words">
                 {outputs[selected] ?? ""}
               </pre>

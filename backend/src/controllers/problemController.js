@@ -144,6 +144,8 @@ export const submitProblem = async (req, res) => {
     const results = await runTests(language, code, inputs.map((input) => input.replace(/\\n/g, "\n")));
 
     const outputs = [];
+    // pass/fail per test case, so students see which ones are wrong (inputs and expected outputs stay hidden)
+    const tests = [];
     let error = "";
     // fewer results than test cases only happens when a run failed
     let passed = results.length === inputs.length;
@@ -156,7 +158,9 @@ export const submitProblem = async (req, res) => {
       }
       const actual = (result.output || "").trim();
       outputs.push(actual);
-      if (normalizeOutput(actual) !== normalizeOutput(expected[i] || "")) passed = false;
+      const ok = normalizeOutput(actual) === normalizeOutput(expected[i] || "");
+      tests.push(ok);
+      if (!ok) passed = false;
     }
 
     // A failure of the code runner itself (rate limit, network) is not the student's attempt
@@ -179,7 +183,7 @@ export const submitProblem = async (req, res) => {
       await user.save();
     }
 
-    return res.json({ passed, outputs, error });
+    return res.json({ passed, outputs, tests, total: inputs.length, error });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Server error" });

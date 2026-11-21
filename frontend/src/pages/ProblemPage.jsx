@@ -26,6 +26,8 @@ function ProblemPage() {
 
   const navigate = useNavigate();
   const [outputArr, setOutputArr] = useState(null);
+  // pass/fail per test case from the server: { tests: [true, false, ...], total }
+  const [testInfo, setTestInfo] = useState(null);
 
   const [currentProblemId, setCurrentProblemId] = useState(null);
   const [selectedLanguage, setSelectedLanguage] = useState("python");
@@ -68,6 +70,7 @@ function ProblemPage() {
       }
 
       setOutputArr([])
+      setTestInfo(null);
       setIsCorrect(null);
       setError(null);
       setSolved(problem.solved || null);
@@ -83,6 +86,7 @@ function ProblemPage() {
       setCode(currentProblemId.starterCode[newLang]);
     }
     setOutputArr([])
+    setTestInfo(null);
     setIsCorrect(null);
     setError(null);
     setSolved(problem.solved || null);
@@ -108,6 +112,7 @@ function ProblemPage() {
   const handleRunCode = async () => {
     setIsRunning(true);
     setOutputArr([])
+    setTestInfo(null);
     setIsCorrect(null);
     setError(null);
     // make room for the result so it shows without scrolling
@@ -123,6 +128,7 @@ function ProblemPage() {
       });
 
       setOutputArr(result.outputs || []);
+      setTestInfo({ tests: result.tests || [], total: result.total || 0 });
       setError(result.error || "");
       setIsCorrect(result.passed);
 
@@ -208,6 +214,8 @@ function ProblemPage() {
                 <Panel ref={mobileOutputRef} defaultSize={30} minSize={20}>
                   <OutputPanel
                     output={outputArr}
+                    tests={testInfo?.tests}
+                    total={testInfo?.total}
                     error={error}
                     isCorrect={isCorrect}
                     solved={solved}
@@ -255,6 +263,8 @@ function ProblemPage() {
                 <Panel ref={desktopOutputRef} defaultSize={30} minSize={20}>
                   <OutputPanel
                     output={outputArr}
+                    tests={testInfo?.tests}
+                    total={testInfo?.total}
                     error={error}
                     isCorrect={isCorrect}
                     solved={solved}
